@@ -64,7 +64,7 @@ app.post('/api/auth/register-hostel', async (req, res) => {
     const {
       wardenName, wardenTitle, adminUsername, adminPassword,
       hostelName, hostelAddress, totalRooms, roomSeater,
-      acType, blocks, roomsPerBlock, accessCode, bgImage, dashImage
+      acType, blocks, roomsPerBlock, accessCode
     } = req.body;
 
     if (!adminUsername || !adminPassword || !hostelName || !accessCode) {
@@ -99,9 +99,7 @@ app.post('/api/auth/register-hostel', async (req, res) => {
       calculatedRooms: calculatedRoomsCount,
       roomSeater: seaterVal,
       acType: acType,
-      blocks: blocksList.join(', '),
-      bgImage: bgImage || '',
-      dashImage: dashImage || ''
+      blocks: blocksList.join(', ')
     };
 
     const newRooms = [];
@@ -369,8 +367,7 @@ app.get('/api/hostel/data', authenticateToken, async (req, res) => {
         id: hostel.id, name: hostel.name, address: hostel.address,
         wardenName: hostel.wardenName, wardenTitle: hostel.wardenTitle,
         accessCode: hostel.accessCode, totalRooms: hostel.totalRooms,
-        roomSeater: hostel.roomSeater, acType: hostel.acType, blocks: hostel.blocks,
-        bgImage: hostel.bgImage || '', dashImage: hostel.dashImage || ''
+        roomSeater: hostel.roomSeater, acType: hostel.acType, blocks: hostel.blocks
       };
     }
     res.json(data);

@@ -36,7 +36,7 @@
 
         // --- Mock Routes ---
         if (path === "/api/auth/register-hostel" && method === "POST") {
-          const { wardenName, wardenTitle, adminUsername, adminPassword, hostelName, hostelAddress, totalRooms, roomSeater, acType, blocks, roomsPerBlock, accessCode, bgImage, dashImage } = body;
+          const { wardenName, wardenTitle, adminUsername, adminPassword, hostelName, hostelAddress, totalRooms, roomSeater, acType, blocks, roomsPerBlock, accessCode } = body;
 
           const hostelObj = {
             id: 'hostel_demo',
@@ -49,9 +49,7 @@
             roomSeater: parseInt(roomSeater) || 2,
             acType: acType || 'AC',
             blocks: blocks || 'A, B, C',
-            calculatedRooms: parseInt(totalRooms) || 120,
-            bgImage: bgImage || "",
-            dashImage: dashImage || ""
+            calculatedRooms: parseInt(totalRooms) || 120
           };
           localStorage.setItem("hms_hostel_info", JSON.stringify(hostelObj));
 
@@ -95,10 +93,13 @@
             "Cleanliness of rooms and common washrooms is a shared responsibility."
           ]));
           localStorage.setItem("hms_food_menu", JSON.stringify({
-            breakfast: "Poha, Milk, Sprouts",
-            lunch: "Rice, Dal, Seasonal Sabji, Roti, Salad",
-            eveningSnack: "Tea, Veg Sandwich, Biscuits",
-            dinner: "Roti, Paneer Butter Masala, Dal Tadka, Sweet"
+            Monday: { breakfast: "Poha, Milk, Sprouts", lunch: "Rice, Dal, Seasonal Sabji, Roti, Salad", eveningSnack: "Tea, Veg Sandwich, Biscuits", dinner: "Roti, Paneer Butter Masala, Dal Tadka, Sweet" },
+            Tuesday: { breakfast: "Idli Sambar", lunch: "Rajma Chawal", eveningSnack: "Coffee, Cookies", dinner: "Aloo Paratha, Curd" },
+            Wednesday: { breakfast: "Aloo Puri", lunch: "Chole Bhature", eveningSnack: "Tea, Samosa", dinner: "Paneer Bhurji, Roti" },
+            Thursday: { breakfast: "Upma", lunch: "Kadhi Pakora, Rice", eveningSnack: "Tea, Rusks", dinner: "Mix Veg, Roti, Dal" },
+            Friday: { breakfast: "Poha", lunch: "Dal Makhani, Jeera Rice", eveningSnack: "Juice, Chips", dinner: "Egg Curry / Malai Kofta, Roti" },
+            Saturday: { breakfast: "Uttapam", lunch: "Aloo Gobi, Roti, Dal", eveningSnack: "Tea, Kachori", dinner: "Chicken Curry / Shahi Paneer, Roti" },
+            Sunday: { breakfast: "Masala Dosa", lunch: "Veg Biryani, Raita", eveningSnack: "Tea, Cake", dinner: "Puri Sabji, Halwa" }
           }));
           localStorage.setItem("hms_attendance", JSON.stringify([]));
           localStorage.setItem("hms_notices", JSON.stringify([]));
@@ -734,88 +735,74 @@ function setupLoginHandlers() {
       const adminUsername = document.getElementById("admin-reg-username").value.trim();
       const adminPassword = document.getElementById("admin-reg-password").value;
 
-      const bgInput = document.getElementById("admin-reg-bg-image");
-      const dashInput = document.getElementById("admin-reg-dash-image");
-      const bgFile = bgInput && bgInput.files ? bgInput.files[0] : null;
-      const dashFile = dashInput && dashInput.files ? dashInput.files[0] : null;
+      const hostelName = document.getElementById("admin-reg-hostel-name").value.trim();
+      const hostelAddress = document.getElementById("admin-reg-hostel-address").value.trim();
+      const accessCode = (document.getElementById("admin-reg-access-code")?.value || "").trim().toUpperCase();
 
-      Promise.all([readFileAsDataURL(bgFile), readFileAsDataURL(dashFile)])
-        .then(([bgBase64, dashBase64]) => {
-          const hostelName = document.getElementById("admin-reg-hostel-name").value.trim();
-          const hostelAddress = document.getElementById("admin-reg-hostel-address").value.trim();
-          const accessCode = (document.getElementById("admin-reg-access-code")?.value || "").trim().toUpperCase();
+      if (!accessCode) {
+        alert("🔑 Please set a Hostel Access Code. Students will need this to register.");
+        return;
+      }
 
-          if (!accessCode) {
-            alert("🔑 Please set a Hostel Access Code. Students will need this to register.");
-            return;
+      const totalRoomsVal = parseInt(document.getElementById("admin-reg-total-rooms").value);
+      const seaterVal = parseInt(document.getElementById("admin-reg-seater").value);
+      const acVal = document.getElementById("admin-reg-ac").value;
+      const blocksInput = document.getElementById("admin-reg-blocks").value.trim();
+      const roomsPerBlockRaw = document.getElementById("admin-reg-rooms-per-block").value;
+      const roomsPerBlockVal = roomsPerBlockRaw ? parseInt(roomsPerBlockRaw) : totalRoomsVal;
+
+      const registerPayload = {
+        wardenName,
+        wardenTitle,
+        adminUsername,
+        adminPassword,
+        hostelName,
+        hostelAddress,
+        totalRooms: totalRoomsVal,
+        roomSeater: seaterVal,
+        acType: acVal,
+        blocks: blocksInput,
+        roomsPerBlock: roomsPerBlockVal,
+        accessCode
+      };
+
+      fetch("/api/auth/register-hostel", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(registerPayload)
+      })
+        .then(async res => {
+          const text = await res.text();
+          let data = {};
+          try {
+            data = text ? JSON.parse(text) : {};
+          } catch (e) {
+            throw new Error(res.ok ? "Invalid server response" : "Server returned an error (" + res.status + ")");
           }
+          if (!res.ok) {
+            throw new Error(data.error || "Setup failed");
+          }
+          return data;
+        })
+        .then(data => {
+          alert(`Warden registered successfully!\nHostel "${hostelName}" configured.\nYou can now log in with your Admin credentials!`);
 
-          const totalRoomsVal = parseInt(document.getElementById("admin-reg-total-rooms").value);
-          const seaterVal = parseInt(document.getElementById("admin-reg-seater").value);
-          const acVal = document.getElementById("admin-reg-ac").value;
-          const blocksInput = document.getElementById("admin-reg-blocks").value.trim();
-          const roomsPerBlockRaw = document.getElementById("admin-reg-rooms-per-block").value;
-          const roomsPerBlockVal = roomsPerBlockRaw ? parseInt(roomsPerBlockRaw) : totalRoomsVal;
+          // Switch back to Login view
+          adminRegisterForm.reset();
+          adminRegisterForm.style.display = "none";
+          document.getElementById("login-role-selector").style.display = "flex";
+          loginForm.style.display = "block";
+          document.getElementById("login-title-text").textContent = "HMS Portal";
+          document.getElementById("login-subtitle-text").textContent = "Hostel Management System Login";
+          helpText.style.display = "block";
 
-          const registerPayload = {
-            wardenName,
-            wardenTitle,
-            adminUsername,
-            adminPassword,
-            hostelName,
-            hostelAddress,
-            totalRooms: totalRoomsVal,
-            roomSeater: seaterVal,
-            acType: acVal,
-            blocks: blocksInput,
-            roomsPerBlock: roomsPerBlockVal,
-            accessCode,
-            bgImage: bgBase64,
-            dashImage: dashBase64
-          };
+          const regText = currentLoginRole === "student" ? "Register Now" : "Register Warden/Hostel";
+          toggleWrap.innerHTML = `<p style="font-size: 0.85rem; color: var(--text-secondary);">Don't have an account? <span id="btn-show-register" style="color: var(--accent-primary); font-weight: 600; cursor: pointer; text-decoration: underline;">${regText}</span></p>`;
 
-          fetch("/api/auth/register-hostel", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(registerPayload)
-          })
-            .then(async res => {
-              const text = await res.text();
-              let data = {};
-              try {
-                data = text ? JSON.parse(text) : {};
-              } catch (e) {
-                throw new Error(res.ok ? "Invalid server response" : "Server returned an error (" + res.status + ")");
-              }
-              if (!res.ok) {
-                throw new Error(data.error || "Setup failed");
-              }
-              return data;
-            })
-            .then(data => {
-              alert(`Warden registered successfully!\nHostel "${hostelName}" configured.\nYou can now log in with your Admin credentials!`);
-
-              // Switch back to Login view
-              adminRegisterForm.reset();
-              adminRegisterForm.style.display = "none";
-              document.getElementById("login-role-selector").style.display = "flex";
-              loginForm.style.display = "block";
-              document.getElementById("login-title-text").textContent = "HMS Portal";
-              document.getElementById("login-subtitle-text").textContent = "Hostel Management System Login";
-              helpText.style.display = "block";
-
-              const regText = currentLoginRole === "student" ? "Register Now" : "Register Warden/Hostel";
-              toggleWrap.innerHTML = `<p style="font-size: 0.85rem; color: var(--text-secondary);">Don't have an account? <span id="btn-show-register" style="color: var(--accent-primary); font-weight: 600; cursor: pointer; text-decoration: underline;">${regText}</span></p>`;
-
-              initApp();
-            })
-            .catch(err => {
-              alert("❌ Setup Error: " + err.message);
-            });
+          initApp();
         })
         .catch(err => {
-          console.error("Error reading admin configuration files:", err);
-          alert("Error processing uploaded documents. Please try again.");
+          alert("❌ Setup Error: " + err.message);
         });
     };
   }
@@ -1227,24 +1214,7 @@ function renderStudentDashboard() {
   const hostelInfo = DB.get("hostel_info") || { name: "Grand Heritage Boys Hostel" };
   if (welcomeHostel) welcomeHostel.innerHTML = `<i class="fa-solid fa-hotel"></i> ${hostelInfo.name}`;
 
-  // Apply dashboard banner image to student welcome card (same as admin)
-  const studentWelcomeCard = document.getElementById("student-welcome-banner-card");
-  const dashWelcomeHostelEl = document.getElementById("dash-welcome-hostel");
-  if (studentWelcomeCard && hostelInfo && hostelInfo.dashImage) {
-    studentWelcomeCard.style.backgroundImage = `linear-gradient(135deg, rgba(15, 23, 42, 0.9), rgba(15, 23, 42, 0.65)), url(${hostelInfo.dashImage})`;
-    studentWelcomeCard.style.backgroundSize = "cover";
-    studentWelcomeCard.style.backgroundPosition = "center";
-    studentWelcomeCard.style.color = "#ffffff";
-    if (welcomeText) welcomeText.style.color = "#ffffff";
-    if (welcomeRoom) welcomeRoom.style.color = "rgba(255, 255, 255, 0.8)";
-    if (dashWelcomeHostelEl) dashWelcomeHostelEl.style.color = "rgba(255, 255, 255, 0.65)";
-  } else if (studentWelcomeCard) {
-    studentWelcomeCard.style.backgroundImage = "";
-    studentWelcomeCard.style.color = "";
-    if (welcomeText) welcomeText.style.color = "";
-    if (welcomeRoom) welcomeRoom.style.color = "";
-    if (dashWelcomeHostelEl) dashWelcomeHostelEl.style.color = "";
-  }
+  // Removed dashboard background image logic
 
   // Update Dashboard Summary Stats from DB
   const rooms = DB.get("rooms") || [];
@@ -1264,7 +1234,9 @@ function renderStudentDashboard() {
   if (pageTitle) pageTitle.textContent = `${currentStudent.name}'s Dashboard`;
 
   // Update Food Menu strip
-  const menu = DB.get("food_menu") || {};
+  const fullMenu = DB.get("food_menu") || {};
+  const currentDay = new Date().toLocaleDateString('en-US', { weekday: 'long' });
+  const menu = fullMenu[currentDay] || {};
   const dashMenuGrid = document.getElementById("dash-menu-grid");
   if (dashMenuGrid) {
     dashMenuGrid.innerHTML = `
@@ -1408,8 +1380,22 @@ function renderRoomDetails() {
   }
 }
 
-function renderFoodMenu() {
-  const menu = DB.get("food_menu") || {};
+function renderFoodMenu(selectedDayOverride) {
+  const fullMenu = DB.get("food_menu") || {};
+  let currentDay = new Date().toLocaleDateString('en-US', { weekday: 'long' });
+  
+  const studentDaySelector = document.getElementById("student-menu-day");
+  if (studentDaySelector && !selectedDayOverride) {
+      if (!studentDaySelector.dataset.initialized) {
+          studentDaySelector.value = currentDay;
+          studentDaySelector.dataset.initialized = "true";
+      }
+      currentDay = studentDaySelector.value;
+  } else if (selectedDayOverride) {
+      currentDay = selectedDayOverride;
+  }
+
+  const menu = fullMenu[currentDay] || {};
   document.getElementById("menu-txt-breakfast").textContent = menu.breakfast || "N/A";
   document.getElementById("menu-txt-lunch").textContent = menu.lunch || "N/A";
   document.getElementById("menu-txt-eveningSnack").textContent = menu.eveningSnack || "N/A";
@@ -1625,18 +1611,7 @@ function renderAdminDashboard() {
   const hostelInfo = DB.get("hostel_info") || { name: "Grand Heritage Boys Hostel" };
   if (adminWelcomeHostel) adminWelcomeHostel.innerHTML = `<i class="fa-solid fa-hotel"></i> ${hostelInfo.name}`;
 
-  const welcomeCard = document.getElementById("admin-welcome-banner-card");
-  if (welcomeCard && hostelInfo && hostelInfo.dashImage) {
-    welcomeCard.style.backgroundImage = `linear-gradient(135deg, rgba(15, 23, 42, 0.9), rgba(15, 23, 42, 0.65)), url(${hostelInfo.dashImage})`;
-    welcomeCard.style.backgroundSize = "cover";
-    welcomeCard.style.backgroundPosition = "center";
-    welcomeCard.style.color = "#ffffff";
-    if (adminWelcomeHostel) adminWelcomeHostel.style.color = "rgba(255, 255, 255, 0.85)";
-  } else if (welcomeCard) {
-    welcomeCard.style.backgroundImage = "";
-    welcomeCard.style.color = "";
-    if (adminWelcomeHostel) adminWelcomeHostel.style.color = "";
-  }
+  // Removed dashboard background image logic
 
   // 1. Dashboard summary cards
   const totalStudents = students.length;
@@ -1766,11 +1741,25 @@ window.updateLeaveStatus = function (leaveId, status) {
 };
 
 function loadAdminMenuForm() {
-  const menu = DB.get("food_menu") || {};
-  document.getElementById("admin-breakfast").value = menu.breakfast || "";
-  document.getElementById("admin-lunch").value = menu.lunch || "";
-  document.getElementById("admin-snack").value = menu.eveningSnack || "";
-  document.getElementById("admin-dinner").value = menu.dinner || "";
+  const fullMenu = DB.get("food_menu") || {};
+  const tbody = document.getElementById("admin-menu-tbody");
+  if (!tbody) return;
+  
+  const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+  let html = "";
+  days.forEach(day => {
+    const menu = fullMenu[day] || { breakfast: "", lunch: "", eveningSnack: "", dinner: "" };
+    html += `
+      <tr data-day="${day}">
+        <td style="font-weight: 600; padding: 12px 16px;">${day}</td>
+        <td style="padding: 6px 12px;"><input type="text" class="form-control" name="breakfast" value="${menu.breakfast}" required style="min-width: 150px;"></td>
+        <td style="padding: 6px 12px;"><input type="text" class="form-control" name="lunch" value="${menu.lunch}" required style="min-width: 150px;"></td>
+        <td style="padding: 6px 12px;"><input type="text" class="form-control" name="eveningSnack" value="${menu.eveningSnack}" required style="min-width: 150px;"></td>
+        <td style="padding: 6px 12px;"><input type="text" class="form-control" name="dinner" value="${menu.dinner}" required style="min-width: 150px;"></td>
+      </tr>
+    `;
+  });
+  tbody.innerHTML = html;
 }
 
 function renderAdminNotices() {
@@ -2417,16 +2406,32 @@ function setupFormSubmissions() {
   if (adminMenuForm) {
     adminMenuForm.addEventListener("submit", (e) => {
       e.preventDefault();
-      const menu = {
-        breakfast: document.getElementById("admin-breakfast").value,
-        lunch: document.getElementById("admin-lunch").value,
-        eveningSnack: document.getElementById("admin-snack").value,
-        dinner: document.getElementById("admin-dinner").value
-      };
+      
+      const fullMenu = DB.get("food_menu") || {};
+      const rows = document.querySelectorAll("#admin-menu-tbody tr");
+      rows.forEach(row => {
+        const day = row.getAttribute("data-day");
+        if (day) {
+          fullMenu[day] = {
+            breakfast: row.querySelector('input[name="breakfast"]').value,
+            lunch: row.querySelector('input[name="lunch"]').value,
+            eveningSnack: row.querySelector('input[name="eveningSnack"]').value,
+            dinner: row.querySelector('input[name="dinner"]').value
+          };
+        }
+      });
 
-      DB.set("food_menu", menu);
-      alert("Mess food menu updated successfully!");
+      DB.set("food_menu", fullMenu);
+      alert("Mess food menu updated successfully for all 7 days!");
       renderFoodMenu();
+    });
+  }
+
+  // Student Menu Day Selector
+  const studentMenuDay = document.getElementById("student-menu-day");
+  if (studentMenuDay) {
+    studentMenuDay.addEventListener("change", (e) => {
+      renderFoodMenu(e.target.value);
     });
   }
 

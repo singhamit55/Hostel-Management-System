@@ -14,9 +14,7 @@ const HostelSchema = new mongoose.Schema({
   calculatedRooms: Number,
   roomSeater: Number,
   acType: String,
-  blocks: String,
-  bgImage: String,
-  dashImage: String
+  blocks: String
 });
 
 const AdminSchema = new mongoose.Schema({
@@ -47,7 +45,15 @@ const StudentSchema = new mongoose.Schema({
 
 const TenantSchema = new mongoose.Schema({
   hostelId: { type: String, required: true, unique: true },
-  food_menu: { type: Object, default: { breakfast: "", lunch: "", eveningSnack: "", dinner: "" } },
+  food_menu: { type: Object, default: { 
+    Monday: { breakfast: "", lunch: "", eveningSnack: "", dinner: "" },
+    Tuesday: { breakfast: "", lunch: "", eveningSnack: "", dinner: "" },
+    Wednesday: { breakfast: "", lunch: "", eveningSnack: "", dinner: "" },
+    Thursday: { breakfast: "", lunch: "", eveningSnack: "", dinner: "" },
+    Friday: { breakfast: "", lunch: "", eveningSnack: "", dinner: "" },
+    Saturday: { breakfast: "", lunch: "", eveningSnack: "", dinner: "" },
+    Sunday: { breakfast: "", lunch: "", eveningSnack: "", dinner: "" }
+  } },
   rooms: { type: Array, default: [] },
   attendance: { type: Array, default: [] },
   notices: { type: Array, default: [] },
@@ -103,7 +109,15 @@ const DB = {
     
     const initialTenantData = {
       hostelId: hostelObj.id,
-      food_menu: { breakfast: "", lunch: "", eveningSnack: "", dinner: "" },
+      food_menu: { 
+        Monday: { breakfast: "", lunch: "", eveningSnack: "", dinner: "" },
+        Tuesday: { breakfast: "", lunch: "", eveningSnack: "", dinner: "" },
+        Wednesday: { breakfast: "", lunch: "", eveningSnack: "", dinner: "" },
+        Thursday: { breakfast: "", lunch: "", eveningSnack: "", dinner: "" },
+        Friday: { breakfast: "", lunch: "", eveningSnack: "", dinner: "" },
+        Saturday: { breakfast: "", lunch: "", eveningSnack: "", dinner: "" },
+        Sunday: { breakfast: "", lunch: "", eveningSnack: "", dinner: "" }
+      },
       rooms: initialRooms,
       attendance: [],
       notices: [],
