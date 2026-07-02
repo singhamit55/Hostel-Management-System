@@ -8,7 +8,7 @@
   <!-- FontAwesome Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <!-- Custom Stylesheet -->
-  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/styles.css?v=mobile-ready">
 </head>
 
 <body>
@@ -34,7 +34,6 @@
       <div class="login-role-switch" id="login-role-selector">
         <button class="login-role-btn active" id="login-role-student">Student</button>
         <button class="login-role-btn" id="login-role-admin">Admin</button>
-        <button class="login-role-btn" id="login-role-owner">Owner</button>
       </div>
 
       <!-- Login Form -->
@@ -404,12 +403,6 @@
           <span>Visitor Register</span>
         </li>
 
-        <!-- Owner Sidebar Menu Items -->
-        <li class="menu-item" data-target="owner-dashboard" data-role="owner" style="display: none;">
-          <i class="fa-solid fa-user-shield"></i>
-          <span>Owner Dashboard</span>
-        </li>
-
         <!-- Shared Menu Items -->
         <li class="menu-item" data-target="settings">
           <i class="fa-solid fa-gear"></i>
@@ -480,37 +473,6 @@
         </div>
       </header>
 
-      <!-- GLOBAL ANNOUNCEMENT BANNER -->
-      <div id="global-announcement-banner"
-        style="display: none; background: rgba(255, 69, 58, 0.1); border-left: 4px solid var(--danger-color); padding: 12px 20px; margin: 15px; border-radius: var(--border-radius); align-items: center; justify-content: space-between;">
-        <div>
-          <h4
-            style="color: var(--danger-color); margin: 0; font-size: 0.95rem; display: flex; align-items: center; gap: 8px;">
-            <i class="fa-solid fa-bullhorn"></i> <span id="global-notice-title">System Notice</span>
-          </h4>
-          <p id="global-notice-msg" style="margin: 4px 0 0 0; font-size: 0.85rem; color: var(--text-primary);">Notice
-            content</p>
-          <small id="global-notice-date" style="color: var(--text-secondary); font-size: 0.75rem;">Date</small>
-        </div>
-      </div>
-
-      <!-- ADMIN BILLING WARNING BANNER -->
-      <div id="admin-billing-banner"
-        style="display: none; background: rgba(255, 159, 10, 0.1); border-left: 4px solid var(--warning-color); padding: 12px 20px; margin: 0 15px 15px 15px; border-radius: var(--border-radius);">
-        <h4
-          style="color: var(--warning-color); margin: 0; font-size: 0.95rem; display: flex; align-items: center; gap: 8px;">
-          <i class="fa-solid fa-triangle-exclamation"></i> Subscription Payment Required
-        </h4>
-        <p style="margin: 4px 0 0 0; font-size: 0.85rem; color: var(--text-primary);">Your hostel management software
-          subscription is currently <strong style="color: var(--warning-color);">Pending</strong>. Please make a payment
-          to the Owner to avoid service interruption.</p>
-        <div
-          style="margin-top: 10px; padding: 10px; background: var(--bg-color); border-radius: 6px; font-size: 0.85rem;">
-          <strong style="display: block; margin-bottom: 5px; color: var(--text-secondary);">Owner Bank Details:</strong>
-          <span id="billing-bank-details">Loading...</span>
-        </div>
-      </div>
-
       <!-- ============================================== -->
       <!-- STUDENT DYNAMIC VIEWS -->
       <!-- ============================================== -->
@@ -523,10 +485,10 @@
           <div>
             <h2 style="font-size: 1.6rem; font-family: 'Outfit', sans-serif;" id="dash-welcome-text">👋 Welcome, Rahul
               Patel</h2>
-            <p style="color: var(--text-secondary); font-size: 0.95rem; margin-top: 4px;" id="dash-welcome-room">Room
+            <p style="font-size: 0.95rem; margin-top: 4px;" id="dash-welcome-room">Room
               No: 203 | Block B</p>
-            <p style="color: var(--text-muted); font-size: 0.8rem; margin-top: 4px;" id="dash-welcome-hostel"><i
-                class="fa-solid fa-hotel"></i> Grand Heritage Boys Hostel</p>
+            <p style="font-size: 0.8rem; margin-top: 4px;" id="dash-welcome-hostel"><i class="fa-solid fa-hotel"></i>
+              Grand Heritage Boys Hostel</p>
           </div>
 
         </div>
@@ -1857,129 +1819,6 @@
     </div>
   </div>
 
-  <!-- OWNER DASHBOARD -->
-  <section class="page-content" id="view-owner-dashboard" style="display: none;">
-
-    <!-- Analytics -->
-    <div
-      style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 20px;">
-      <div class="info-card" style="text-align: center; padding: 20px;">
-        <h3 style="color: var(--text-secondary); font-size: 1rem;">Total Hostels</h3>
-        <p id="owner-stat-hostels"
-          style="font-size: 2.5rem; font-weight: bold; color: var(--accent-primary); margin-top: 10px;">0</p>
-      </div>
-      <div class="info-card" style="text-align: center; padding: 20px;">
-        <h3 style="color: var(--text-secondary); font-size: 1rem;">Total Students</h3>
-        <p id="owner-stat-students"
-          style="font-size: 2.5rem; font-weight: bold; color: var(--accent-primary); margin-top: 10px;">0</p>
-      </div>
-    </div>
-
-    <!-- Global Announcements & Bank Details -->
-    <div
-      style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-bottom: 20px;">
-      <div class="info-card">
-        <h3>📢 Global Announcement</h3>
-        <p style="color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 15px;">Send a notice to ALL hostels
-          and students.</p>
-        <form id="owner-notice-form">
-          <div class="form-group">
-            <input type="text" class="form-control" id="owner-notice-title" placeholder="Notice Title" required>
-          </div>
-          <div class="form-group">
-            <textarea class="form-control" id="owner-notice-msg" rows="3" placeholder="Message content..."
-              required></textarea>
-          </div>
-          <button type="submit" class="submit-btn" style="width: 100%;">Broadcast Notice</button>
-        </form>
-      </div>
-
-      <div class="info-card">
-        <h3>💳 Receiving Bank Details</h3>
-        <p style="color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 15px;">Update your bank details for
-          Admin subscription payments.</p>
-        <form id="owner-bank-form">
-          <div class="form-row">
-            <div class="form-group">
-              <label for="owner-bank-name">Bank Name</label>
-              <input type="text" class="form-control" id="owner-bank-name" placeholder="e.g. State Bank of India"
-                required>
-            </div>
-            <div class="form-group">
-              <label for="owner-bank-accname">Account Name</label>
-              <input type="text" class="form-control" id="owner-bank-accname" placeholder="e.g. Vikram Singh" required>
-            </div>
-          </div>
-          <div class="form-row">
-            <div class="form-group">
-              <label for="owner-bank-accnum">Account Number</label>
-              <input type="text" class="form-control" id="owner-bank-accnum" placeholder="Account Number" required>
-            </div>
-            <div class="form-group">
-              <label for="owner-bank-ifsc">IFSC Code</label>
-              <input type="text" class="form-control" id="owner-bank-ifsc" placeholder="IFSC Code" required>
-            </div>
-          </div>
-          <button type="submit" class="submit-btn" style="width: 100%; background: var(--success-color);">Save Bank
-            Details</button>
-        </form>
-      </div>
-    </div>
-
-    <!-- Hostels Management -->
-    <div class="info-card" style="margin-bottom: 20px;">
-      <h3>🏢 Hostels Management</h3>
-      <p style="color: var(--text-secondary); font-size: 0.9rem; margin-top: 5px; margin-bottom: 15px;">View and manage
-        all registered hostels in the system.</p>
-      <div style="overflow-x: auto;">
-        <table class="data-table" style="width: 100%; border-collapse: collapse;">
-          <thead>
-            <tr style="text-align: left; border-bottom: 1px solid var(--glass-border);">
-              <th style="padding: 12px; color: var(--text-secondary); font-weight: 600;">Hostel Name</th>
-              <th style="padding: 12px; color: var(--text-secondary); font-weight: 600;">Hostel ID</th>
-              <th style="padding: 12px; color: var(--text-secondary); font-weight: 600;">Warden</th>
-              <th style="padding: 12px; color: var(--text-secondary); font-weight: 600;">Total Rooms</th>
-              <th style="padding: 12px; color: var(--text-secondary); font-weight: 600;">Students</th>
-              <th style="padding: 12px; color: var(--text-secondary); font-weight: 600; text-align: right;">Action</th>
-            </tr>
-          </thead>
-          <tbody id="owner-hostels-list">
-          </tbody>
-        </table>
-      </div>
-    </div>
-
-    <div class="info-card">
-      <div style="display: flex; justify-content: space-between; align-items: center;">
-        <h3>🛡️ Admin Account & Billing Control</h3>
-        <button class="action-btn" id="btn-owner-refresh"
-          style="background: var(--accent-primary); color: white; padding: 6px 12px; border-radius: var(--border-radius); border: none; cursor: pointer;">
-          <i class="fa-solid fa-rotate-right"></i> Refresh
-        </button>
-      </div>
-      <p style="color: var(--text-secondary); font-size: 0.9rem; margin-top: 5px;">Toggle Admin access and manage
-        subscription billing status.</p>
-
-      <div style="margin-top: 20px; overflow-x: auto;">
-        <table class="data-table" style="width: 100%; border-collapse: collapse;">
-          <thead>
-            <tr style="text-align: left; border-bottom: 1px solid var(--glass-border);">
-              <th style="padding: 12px; color: var(--text-secondary); font-weight: 600;">Warden Name</th>
-              <th style="padding: 12px; color: var(--text-secondary); font-weight: 600;">Username</th>
-              <th style="padding: 12px; color: var(--text-secondary); font-weight: 600;">Hostel ID</th>
-              <th style="padding: 12px; color: var(--text-secondary); font-weight: 600;">Billing Status</th>
-              <th style="padding: 12px; color: var(--text-secondary); font-weight: 600;">Access</th>
-              <th style="padding: 12px; color: var(--text-secondary); font-weight: 600; text-align: right;">Action</th>
-            </tr>
-          </thead>
-          <tbody id="owner-admins-list">
-            <!-- Admins rendered via JS -->
-          </tbody>
-        </table>
-      </div>
-    </div>
-  </section>
-
   <!-- 3. WARDEN REGISTRATION APPLICATION DETAILS MODAL -->
   <div class="modal-overlay" id="modal-app-details">
     <div class="modal-content" style="max-width: 600px;">
@@ -2063,8 +1902,8 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
   <!-- Project Javascript -->
-  <script src="js/db.js?v=owner"></script>
-  <script src="js/app.js?v=owner"></script>
+  <script src="js/db.js?v=fixed"></script>
+  <script src="js/app.js?v=fixed"></script>
 </body>
 
 </html>

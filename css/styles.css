@@ -1620,3 +1620,136 @@ textarea.form-control {
   from { opacity: 0; transform: translateY(-10px); }
   to { opacity: 1; transform: translateY(0); }
 }
+
+/* ==========================================================================
+   Responsive Mobile Media Queries
+   ========================================================================== */
+
+@media (max-width: 768px) {
+  /* Login Screen */
+  #login-container {
+    padding: 20px;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .login-card {
+    width: 100% !important;
+    max-width: 400px;
+    padding: 30px 20px !important;
+    margin: 0 auto;
+  }
+  
+  .login-role-switch {
+    flex-direction: row;
+    width: 100%;
+  }
+  
+  /* App Shell & Sidebar */
+  #app-container {
+    flex-direction: column;
+  }
+  
+  .sidebar {
+    width: 100%;
+    height: auto;
+    position: relative;
+    padding: 16px;
+    border-right: none;
+    border-bottom: 1px solid var(--glass-border);
+    display: flex;
+    flex-direction: column;
+  }
+
+  .sidebar-header {
+    justify-content: center;
+  }
+
+  .sidebar-nav {
+    display: flex;
+    flex-direction: row;
+    overflow-x: auto;
+    white-space: nowrap;
+    padding-bottom: 10px;
+    gap: 8px;
+  }
+  
+  .nav-item {
+    margin-bottom: 0;
+    padding: 10px 16px;
+    flex: 0 0 auto;
+  }
+  
+  .sidebar-footer {
+    display: none;
+  }
+
+  .main-content {
+    margin-left: 0 !important;
+    width: 100% !important;
+    padding: 16px !important;
+  }
+
+  .header {
+    flex-direction: column;
+    height: auto;
+    padding: 16px;
+    gap: 12px;
+    align-items: flex-start;
+  }
+
+  .header-actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+  
+  /* Grids and Stats */
+  .dashboard-stats,
+  .menu-cards,
+  .admin-grid {
+    grid-template-columns: 1fr !important;
+    gap: 16px;
+  }
+  
+  .stat-card {
+    padding: 16px;
+  }
+
+  /* Tables */
+  .table-responsive,
+  .table-wrapper {
+    overflow-x: auto;
+    width: 100%;
+    display: block;
+  }
+  
+  table {
+    min-width: 600px; /* Force table width so it scrolls instead of squishing */
+  }
+
+  /* Modals */
+  .modal-content {
+    width: 95% !important;
+    margin: 10% auto;
+    padding: 20px !important;
+  }
+  
+  /* Forms */
+  .form-row, 
+  .form-group-row {
+    flex-direction: column;
+    gap: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .login-card {
+    padding: 20px 16px !important;
+  }
+  .nav-item {
+    font-size: 0.85rem;
+  }
+  h1, h2 {
+    font-size: 1.5rem !important;
+  }
+}

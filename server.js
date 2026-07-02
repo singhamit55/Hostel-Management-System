@@ -10,7 +10,7 @@ const db = require('./database');
 db.init();
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3002;
 const JWT_SECRET = process.env.JWT_SECRET || 'hms_secret_key_2026';
 
 app.use(cors());
@@ -585,95 +585,7 @@ app.post('/api/auth/change-password', authenticateToken, async (req, res) => {
   }
 });
 
-// 8. Owner APIs
-app.get('/api/owner/hostels', authenticateToken, async (req, res) => {
-  if (req.user.role !== 'owner') return res.status(403).json({ error: 'Access denied.' });
-  try {
-    const hostels = await db.getHostels();
-    const students = await db.getStudents();
 
-    const enrichedHostels = hostels.map(h => {
-      const hostelStudents = students.filter(s => s.hostelId === h.id);
-      return {
-        ...h,
-        totalStudents: hostelStudents.length
-      };
-    });
-
-    res.json(enrichedHostels);
-  } catch (err) {
-    res.status(500).json({ error: 'Failed to fetch hostels.' });
-  }
-});
-
-app.delete('/api/owner/hostels/:id', authenticateToken, async (req, res) => {
-  if (req.user.role !== 'owner') return res.status(403).json({ error: 'Access denied.' });
-  try {
-    await db.deleteHostelData(req.params.id);
-    res.json({ success: true, message: 'Hostel and associated data deleted successfully.' });
-  } catch (err) {
-    res.status(500).json({ error: 'Failed to delete hostel.' });
-  }
-});
-
-app.post('/api/owner/update-payment', authenticateToken, async (req, res) => {
-  if (req.user.role !== 'owner') return res.status(403).json({ error: 'Access denied.' });
-  try {
-    const { username, paymentStatus } = req.body;
-    await db.updateAdminPaymentStatus(username, paymentStatus);
-    res.json({ success: true, message: `Payment status updated to ${paymentStatus}.` });
-  } catch (err) {
-    res.status(500).json({ error: 'Failed to update payment status.' });
-  }
-});
-
-app.post('/api/owner/bank-details', authenticateToken, async (req, res) => {
-  if (req.user.role !== 'owner') return res.status(403).json({ error: 'Access denied.' });
-  try {
-    await db.updateOwnerBankDetails(req.user.username, req.body.bankDetails);
-    res.json({ success: true, message: 'Bank details updated successfully.' });
-  } catch (err) {
-    res.status(500).json({ error: 'Failed to update bank details.' });
-  }
-});
-
-app.get('/api/owner/bank-details', authenticateToken, async (req, res) => {
-  try {
-    if (req.user.role === 'student') return res.status(403).json({ error: 'Access denied.' });
-    // Find the first owner or the default one
-    const Owner = db.Models.Owner;
-    const owner = await Owner.findOne({});
-    if (!owner) return res.status(404).json({ error: 'Owner not found.' });
-    res.json(owner.bankDetails || {});
-  } catch (err) {
-    res.status(500).json({ error: 'Failed to fetch bank details.' });
-  }
-});
-
-app.post('/api/owner/global-notice', authenticateToken, async (req, res) => {
-  if (req.user.role !== 'owner') return res.status(403).json({ error: 'Access denied.' });
-  try {
-    const { title, message } = req.body;
-    await db.createGlobalNotice({
-      id: 'GN-' + Date.now(),
-      title,
-      message,
-      date: new Date().toISOString().split('T')[0]
-    });
-    res.json({ success: true, message: 'Global notice sent successfully.' });
-  } catch (err) {
-    res.status(500).json({ error: 'Failed to create global notice.' });
-  }
-});
-
-app.get('/api/global-notices', async (req, res) => {
-  try {
-    const notices = await db.getGlobalNotices();
-    res.json(notices);
-  } catch (err) {
-    res.status(500).json({ error: 'Failed to fetch global notices.' });
-  }
-});
 
 app.get('*', (req, res) => res.sendFile(path.join(__dirname, 'index.html')));
 

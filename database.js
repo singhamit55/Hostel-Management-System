@@ -23,23 +23,13 @@ const AdminSchema = new mongoose.Schema({
   hostelId: String,
   name: String,
   title: String,
-  isActive: { type: Boolean, default: true },
-  paymentStatus: { type: String, default: 'Pending' }
+  isActive: { type: Boolean, default: true }
 });
 
 const OwnerSchema = new mongoose.Schema({
   username: { type: String, required: true, unique: true },
   passwordHash: String,
-  name: String,
-  bankDetails: { type: Object, default: {} }
-});
-
-const GlobalNoticeSchema = new mongoose.Schema({
-  id: { type: String, required: true, unique: true },
-  title: String,
-  message: String,
-  date: String,
-  author: { type: String, default: 'System Owner' }
+  name: String
 });
 
 const StudentSchema = new mongoose.Schema({
@@ -95,11 +85,10 @@ const Admin = mongoose.model('Admin', AdminSchema);
 const Student = mongoose.model('Student', StudentSchema);
 const Tenant = mongoose.model('Tenant', TenantSchema);
 const Owner = mongoose.model('Owner', OwnerSchema);
-const GlobalNotice = mongoose.model('GlobalNotice', GlobalNoticeSchema);
 
 const DB = {
   // Expose models if needed for migration scripts
-  Models: { Hostel, Admin, Student, Tenant, Owner, GlobalNotice },
+  Models: { Hostel, Admin, Student, Tenant, Owner },
 
   async init() {
     try {
@@ -269,19 +258,10 @@ const DB = {
       }
     }
   },
-
-  async getGlobalNotices() {
-    return await GlobalNotice.find({}).sort({ _id: -1 }).lean();
-  },
-
-  async createGlobalNotice(noticeData) {
-    await GlobalNotice.create(noticeData);
-  },
-
-  async updateAdminPaymentStatus(username, status) {
+  async toggleAdminStatus(username, isActive) {
     await Admin.updateOne(
       { username: { $regex: new RegExp(`^${username}$`, 'i') } },
-      { $set: { paymentStatus: status } }
+      { $set: { isActive } }
     );
   },
 
@@ -290,13 +270,6 @@ const DB = {
     await Admin.deleteMany({ hostelId });
     await Student.deleteMany({ hostelId });
     await Tenant.deleteOne({ hostelId });
-  },
-
-  async updateOwnerBankDetails(username, bankDetails) {
-    await Owner.updateOne(
-      { username: { $regex: new RegExp(`^${username}$`, 'i') } },
-      { $set: { bankDetails } }
-    );
   }
 };
 

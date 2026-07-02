@@ -151,11 +151,6 @@
               return mockResponse(200, { success: true, role: 'admin', token: 'mock_token_admin', hostelId: 'hostel_demo', name: admin.name, paymentStatus: admin.paymentStatus || 'Pending' });
             }
             return mockResponse(401, { error: "Invalid admin credentials. Please register your hostel first." });
-          } else if (role === 'owner') {
-            if (username === 'singh321' && password === 'password') {
-              return mockResponse(200, { success: true, role: 'owner', token: 'mock_token_owner', name: 'System Owner' });
-            }
-            return mockResponse(401, { error: "Invalid owner credentials." });
           } else {
             const students = JSON.parse(localStorage.getItem("hms_students") || "[]");
             const student = students.find(s => s.enrollment.toLowerCase() === username.toLowerCase() && s.password === password);
@@ -279,83 +274,6 @@
           return mockResponse(200, { success: true, message: "Password changed successfully locally!" });
         }
 
-        if (path === "/api/owner/admins" && method === "GET") {
-          const admins = JSON.parse(localStorage.getItem("hms_admins") || "[]");
-          const sanitized = admins.map(a => ({
-            username: a.username,
-            name: a.name,
-            hostelId: a.hostelId || 'hostel_demo',
-            isActive: a.isActive !== false,
-            paymentStatus: a.paymentStatus || 'Pending'
-          }));
-          return mockResponse(200, sanitized);
-        }
-
-        if (path === "/api/owner/toggle-admin" && method === "POST") {
-          const { username, isActive } = body;
-          const admins = JSON.parse(localStorage.getItem("hms_admins") || "[]");
-          const adminIdx = admins.findIndex(a => a.username === username);
-          if (adminIdx !== -1) {
-            admins[adminIdx].isActive = isActive;
-            localStorage.setItem("hms_admins", JSON.stringify(admins));
-            return mockResponse(200, { success: true, message: `Admin ${username} is now ${isActive ? 'enabled' : 'disabled'}.` });
-          }
-          return mockResponse(404, { error: "Admin not found." });
-        }
-
-        if (path === "/api/owner/hostels" && method === "GET") {
-          const hStr = localStorage.getItem("hms_hostel_info");
-          const hostels = hStr ? [JSON.parse(hStr)] : [];
-          const students = JSON.parse(localStorage.getItem("hms_students") || "[]");
-          const enriched = hostels.map(h => ({
-            ...h,
-            totalStudents: students.filter(s => s.hostelId === h.id || !s.hostelId).length
-          }));
-          return mockResponse(200, enriched);
-        }
-
-        if (path.startsWith("/api/owner/hostels/") && method === "DELETE") {
-          return mockResponse(200, { success: true, message: 'Hostel and associated data deleted successfully.' });
-        }
-
-        if (path === "/api/owner/update-payment" && method === "POST") {
-          const { username, paymentStatus } = body;
-          const admins = JSON.parse(localStorage.getItem("hms_admins") || "[]");
-          const adminIdx = admins.findIndex(a => a.username === username);
-          if (adminIdx !== -1) {
-            admins[adminIdx].paymentStatus = paymentStatus;
-            localStorage.setItem("hms_admins", JSON.stringify(admins));
-            return mockResponse(200, { success: true, message: `Payment status updated to ${paymentStatus}.` });
-          }
-          return mockResponse(404, { error: 'Admin not found.' });
-        }
-
-        if (path === "/api/owner/bank-details" && method === "POST") {
-          localStorage.setItem("hms_owner_bank_details", JSON.stringify(body.bankDetails));
-          return mockResponse(200, { success: true, message: 'Bank details updated successfully.' });
-        }
-
-        if (path === "/api/owner/bank-details" && method === "GET") {
-          const details = JSON.parse(localStorage.getItem("hms_owner_bank_details") || "{}");
-          return mockResponse(200, details);
-        }
-
-        if (path === "/api/owner/global-notice" && method === "POST") {
-          const notices = JSON.parse(localStorage.getItem("hms_global_notices") || "[]");
-          notices.push({
-            id: 'GN-' + Date.now(),
-            title: body.title,
-            message: body.message,
-            date: new Date().toISOString().split('T')[0]
-          });
-          localStorage.setItem("hms_global_notices", JSON.stringify(notices));
-          return mockResponse(200, { success: true, message: 'Global notice sent successfully.' });
-        }
-
-        if (path === "/api/global-notices" && method === "GET") {
-          const notices = JSON.parse(localStorage.getItem("hms_global_notices") || "[]");
-          return mockResponse(200, notices.reverse());
-        }
 
         return mockResponse(404, { error: "Mock Route not found." });
       }
@@ -442,8 +360,6 @@ function initApp() {
     }
 
     renderAllViews();
-    fetchAndRenderGlobalNotices();
-    checkAdminBillingStatus();
   } else {
     // Show Login layout, hide app
     document.getElementById("login-container").style.display = "flex";
@@ -479,7 +395,6 @@ function checkSession() {
 function setupLoginHandlers() {
   const btnStudent = document.getElementById("login-role-student");
   const btnAdmin = document.getElementById("login-role-admin");
-  const btnOwner = document.getElementById("login-role-owner");
   const usernameLabel = document.getElementById("login-username-label");
   const usernameInput = document.getElementById("login-username");
   const helpText = document.getElementById("login-help-text");
@@ -590,7 +505,6 @@ function setupLoginHandlers() {
       currentLoginRole = "student";
       btnStudent.classList.add("active");
       btnAdmin.classList.remove("active");
-      if (btnOwner) btnOwner.classList.remove("active");
       if (usernameLabel) usernameLabel.textContent = "Enrollment Number";
       if (usernameInput) usernameInput.placeholder = "e.g. ENR20240921";
       if (helpText) helpText.style.display = "none";
@@ -604,7 +518,6 @@ function setupLoginHandlers() {
       currentLoginRole = "admin";
       btnAdmin.classList.add("active");
       btnStudent.classList.remove("active");
-      if (btnOwner) btnOwner.classList.remove("active");
       if (usernameLabel) usernameLabel.textContent = "Admin Username";
       if (usernameInput) usernameInput.placeholder = "e.g. admin";
       if (helpText) helpText.style.display = "none";
@@ -613,19 +526,6 @@ function setupLoginHandlers() {
         toggleWrap.innerHTML = `<p style="font-size: 0.85rem; color: var(--text-secondary);">Don't have an account? <span id="btn-show-register" style="color: var(--accent-primary); font-weight: 600; cursor: pointer; text-decoration: underline;">Register Warden/Hostel</span></p>`;
       }
     };
-
-    if (btnOwner) {
-      btnOwner.onclick = () => {
-        currentLoginRole = "owner";
-        btnOwner.classList.add("active");
-        btnStudent.classList.remove("active");
-        btnAdmin.classList.remove("active");
-        if (usernameLabel) usernameLabel.textContent = "Owner Username";
-        if (usernameInput) usernameInput.placeholder = "e.g. owner";
-        if (helpText) helpText.style.display = "none";
-        if (toggleWrap) toggleWrap.style.display = "none"; // Hide registration for owners
-      };
-    }
   }
 
   // Handle Login form submit
@@ -1078,8 +978,7 @@ function renderSidebarForRole() {
 function routeTo(target) {
   // If Target is role-dependent dashboard, map it properly
   if (target === "dashboard") {
-    if (currentRole === "admin") target = "admin-dashboard";
-    else if (currentRole === "owner") target = "owner-dashboard";
+    target = currentRole === "admin" ? "admin-dashboard" : "dashboard";
   }
 
   // Update Sidebar Active state
@@ -1131,8 +1030,7 @@ function getPageTitle(target) {
     "admin-applications": "Student Registration Applications",
     "admin-hostel": "Manage Hostel & Rules",
     "settings": "System Settings",
-    "about": "About Hostel",
-    "owner-dashboard": "Owner Control Panel"
+    "about": "About Hostel"
   };
   return titles[target] || "Hostel Management";
 }
@@ -1213,7 +1111,6 @@ function setupRoleSwitcher() {
         currentRole = "student";
         btnStudent.classList.add("active");
         btnAdmin.classList.remove("active");
-        if (btnOwner) btnOwner.classList.remove("active");
         renderHeader();
         renderSidebarForRole();
         routeTo("dashboard");
@@ -1226,28 +1123,12 @@ function setupRoleSwitcher() {
         currentRole = "admin";
         btnAdmin.classList.add("active");
         btnStudent.classList.remove("active");
-        if (btnOwner) btnOwner.classList.remove("active");
         renderHeader();
         renderSidebarForRole();
         routeTo("admin-dashboard");
         renderAllViews();
       }
     });
-
-    if (btnOwner) {
-      btnOwner.addEventListener("click", () => {
-        if (currentRole !== "owner") {
-          currentRole = "owner";
-          btnOwner.classList.add("active");
-          btnStudent.classList.remove("active");
-          btnAdmin.classList.remove("active");
-          renderHeader();
-          renderSidebarForRole();
-          routeTo("owner-dashboard");
-          renderAllViews();
-        }
-      });
-    }
   }
 }
 
@@ -1324,252 +1205,6 @@ function renderViewData(viewId) {
     case "about":
       renderAboutSection();
       break;
-    case "owner-dashboard":
-      renderOwnerDashboard();
-      break;
-  }
-}
-
-// ==========================================
-// STUDENT & OWNER DYNAMIC VIEWS RENDERERS
-// ==========================================
-
-async function renderOwnerDashboard() {
-  const token = sessionStorage.getItem("hms_token");
-  const headers = { "Authorization": "Bearer " + token, "Content-Type": "application/json" };
-  
-  // 1. Fetch Hostels & Stats
-  const hostelsBody = document.getElementById("owner-hostels-list");
-  if (hostelsBody) {
-    hostelsBody.innerHTML = `<tr><td colspan="6" style="text-align:center;">Loading...</td></tr>`;
-    try {
-      const res = await fetch("/api/owner/hostels", { headers });
-      const hostels = await res.json();
-      let totalStudents = 0;
-      if (!hostels.error && hostels.length > 0) {
-        hostelsBody.innerHTML = hostels.map(h => {
-          totalStudents += h.totalStudents || 0;
-          return `
-          <tr>
-            <td>${h.name}</td>
-            <td>${h.id}</td>
-            <td>${h.wardenName}</td>
-            <td>${h.totalRooms}</td>
-            <td>${h.totalStudents || 0}</td>
-            <td style="text-align: right;">
-              <button class="action-btn" onclick="deleteHostel('${h.id}')" style="background: var(--danger-color); color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer;">Delete</button>
-            </td>
-          </tr>
-        `}).join("");
-        document.getElementById("owner-stat-hostels").textContent = hostels.length;
-        document.getElementById("owner-stat-students").textContent = totalStudents;
-      } else {
-        hostelsBody.innerHTML = `<tr><td colspan="6" style="text-align:center;">No hostels registered yet.</td></tr>`;
-      }
-    } catch (e) {
-      hostelsBody.innerHTML = `<tr><td colspan="6" style="text-align:center; color: var(--danger-color);">Failed to load hostels.</td></tr>`;
-    }
-  }
-
-  // 2. Fetch Admins & Billing Status
-  const adminsBody = document.getElementById("owner-admins-list");
-  if (adminsBody) {
-    adminsBody.innerHTML = `<tr><td colspan="6" style="text-align:center;">Loading...</td></tr>`;
-    try {
-      const res = await fetch("/api/owner/admins", { headers });
-      const admins = await res.json();
-      if (!admins.error && admins.length > 0) {
-        adminsBody.innerHTML = admins.map(a => `
-          <tr>
-            <td>${a.name}</td>
-            <td>${a.username}</td>
-            <td>${a.hostelId}</td>
-            <td>
-              <select onchange="updatePaymentStatus('${a.username}', this.value)" style="padding: 4px; border-radius: 4px; border: 1px solid var(--glass-border); background: var(--bg-color); color: var(--text-primary);">
-                <option value="Pending" ${a.paymentStatus === 'Pending' ? 'selected' : ''}>Pending</option>
-                <option value="Paid" ${a.paymentStatus === 'Paid' ? 'selected' : ''}>Paid</option>
-              </select>
-            </td>
-            <td>
-              <span class="badge ${a.isActive ? 'resolved' : 'unresolved'}" style="background: ${a.isActive ? 'var(--success-color)' : 'var(--danger-color)'}; color: white;">
-                ${a.isActive ? 'Active' : 'Disabled'}
-              </span>
-            </td>
-            <td style="text-align: right;">
-              <button class="action-btn" onclick="toggleAdminStatus('${a.username}', ${!a.isActive})" style="padding: 6px 12px; font-size: 0.8rem; border-radius: 4px; border: 1px solid var(--glass-border); background: ${a.isActive ? 'var(--danger-color)' : 'var(--success-color)'}; color: white; cursor: pointer;">
-                ${a.isActive ? 'Disable' : 'Enable'}
-              </button>
-            </td>
-          </tr>
-        `).join("");
-      } else {
-        adminsBody.innerHTML = `<tr><td colspan="6" style="text-align:center;">No admins found.</td></tr>`;
-      }
-    } catch (e) {
-      adminsBody.innerHTML = `<tr><td colspan="6" style="text-align:center; color: var(--danger-color);">Failed to load admins.</td></tr>`;
-    }
-  }
-
-  // 3. Fetch Bank Details
-  try {
-    const res = await fetch("/api/owner/bank-details", { headers });
-    const bank = await res.json();
-    if (bank && !bank.error) {
-      document.getElementById("owner-bank-name").value = bank.bankName || '';
-      document.getElementById("owner-bank-accname").value = bank.accountName || '';
-      document.getElementById("owner-bank-accnum").value = bank.accountNumber || '';
-      document.getElementById("owner-bank-ifsc").value = bank.ifsc || '';
-    }
-  } catch (e) {}
-
-  const btnRefresh = document.getElementById("btn-owner-refresh");
-  if (btnRefresh) btnRefresh.onclick = renderOwnerDashboard;
-}
-
-window.deleteHostel = async function(id) {
-  if (!confirm(`Are you SURE you want to delete Hostel ID ${id} and ALL its data? This cannot be undone.`)) return;
-  const token = sessionStorage.getItem("hms_token");
-  try {
-    const res = await fetch(`/api/owner/hostels/${id}`, { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + token } });
-    const data = await res.json();
-    if (data.success) {
-      alert(data.message);
-      renderOwnerDashboard();
-    } else {
-      alert("Error: " + data.error);
-    }
-  } catch (e) { alert("Failed to delete hostel."); }
-};
-
-window.updatePaymentStatus = async function(username, status) {
-  const token = sessionStorage.getItem("hms_token");
-  try {
-    const res = await fetch("/api/owner/update-payment", {
-      method: "POST",
-      headers: { "Content-Type": "application/json", "Authorization": "Bearer " + token },
-      body: JSON.stringify({ username, paymentStatus: status })
-    });
-    const data = await res.json();
-    if (data.success) alert(data.message);
-    else alert("Error: " + data.error);
-  } catch (e) { alert("Failed to update status."); }
-};
-
-window.toggleAdminStatus = function(username, newStatus) {
-  if (!confirm(`Are you sure you want to ${newStatus ? 'enable' : 'disable'} access for admin: ${username}?`)) return;
-
-  fetch("/api/owner/toggle-admin", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "Authorization": "Bearer " + sessionStorage.getItem("hms_token")
-    },
-    body: JSON.stringify({ username, isActive: newStatus })
-  })
-    .then(res => res.json())
-    .then(data => {
-      if (data.success) {
-        alert(data.message);
-        renderOwnerDashboard();
-      } else {
-        alert("Error: " + data.error);
-      }
-    })
-    .catch(err => alert("Error toggling admin: " + err));
-}
-
-// Global Notice and Admin Billing Logic
-document.addEventListener("DOMContentLoaded", () => {
-  const noticeForm = document.getElementById("owner-notice-form");
-  if (noticeForm) {
-    noticeForm.onsubmit = async (e) => {
-      e.preventDefault();
-      const title = document.getElementById("owner-notice-title").value;
-      const message = document.getElementById("owner-notice-msg").value;
-      const token = sessionStorage.getItem("hms_token");
-      try {
-        const res = await fetch("/api/owner/global-notice", {
-          method: "POST",
-          headers: { "Content-Type": "application/json", "Authorization": "Bearer " + token },
-          body: JSON.stringify({ title, message })
-        });
-        const data = await res.json();
-        if (data.success) {
-          alert(data.message);
-          noticeForm.reset();
-        } else alert("Error: " + data.error);
-      } catch (err) {}
-    };
-  }
-
-  const bankForm = document.getElementById("owner-bank-form");
-  if (bankForm) {
-    bankForm.onsubmit = async (e) => {
-      e.preventDefault();
-      const bankDetails = {
-        bankName: document.getElementById("owner-bank-name").value,
-        accountName: document.getElementById("owner-bank-accname").value,
-        accountNumber: document.getElementById("owner-bank-accnum").value,
-        ifsc: document.getElementById("owner-bank-ifsc").value
-      };
-      const token = sessionStorage.getItem("hms_token");
-      try {
-        const res = await fetch("/api/owner/bank-details", {
-          method: "POST",
-          headers: { "Content-Type": "application/json", "Authorization": "Bearer " + token },
-          body: JSON.stringify({ bankDetails })
-        });
-        const data = await res.json();
-        if (data.success) alert(data.message);
-        else alert("Error: " + data.error);
-      } catch (err) {}
-    };
-  }
-  
-  fetchAndRenderGlobalNotices();
-  checkAdminBillingStatus();
-});
-
-async function fetchAndRenderGlobalNotices() {
-  try {
-    const res = await fetch("/api/global-notices");
-    const notices = await res.json();
-    const banner = document.getElementById("global-announcement-banner");
-    if (banner && notices && notices.length > 0) {
-      const latest = notices[0];
-      document.getElementById("global-notice-title").textContent = latest.title;
-      document.getElementById("global-notice-msg").textContent = latest.message;
-      document.getElementById("global-notice-date").textContent = latest.date;
-      banner.style.display = "flex";
-    } else if (banner) {
-      banner.style.display = "none";
-    }
-  } catch (err) {}
-}
-
-async function checkAdminBillingStatus() {
-  const sessionStr = sessionStorage.getItem("hms_session");
-  if (!sessionStr) return;
-  const session = JSON.parse(sessionStr);
-  const billingBanner = document.getElementById("admin-billing-banner");
-  if (!billingBanner) return;
-  
-  if (session.role === 'admin' && session.paymentStatus === 'Pending') {
-    billingBanner.style.display = "block";
-    try {
-      const res = await fetch("/api/owner/bank-details", {
-        headers: { 'Authorization': 'Bearer ' + sessionStorage.getItem('hms_token') }
-      });
-      const bank = await res.json();
-      const bDetails = document.getElementById("billing-bank-details");
-      if (bDetails && bank && bank.accountNumber) {
-        bDetails.innerHTML = `${bank.bankName} - ${bank.accountName}<br>A/C: ${bank.accountNumber} | IFSC: ${bank.ifsc}`;
-      } else if (bDetails) {
-        bDetails.innerHTML = "Owner has not updated bank details yet. Contact Owner directly.";
-      }
-    } catch (err) {}
-  } else {
-    billingBanner.style.display = "none";
   }
 }
 
