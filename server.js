@@ -155,9 +155,27 @@ app.post('/api/auth/login', async (req, res) => {
     const { role, username, password } = req.body;
     if (!username || !password) return res.status(400).json({ error: 'Username and password are required.' });
 
-    if (role === 'admin') {
+    if (role === 'owner') {
+      const owner = await db.findOwner(username);
+      if (!owner) return res.status(401).json({ error: 'Owner account not found.' });
+
+      const matches = bcrypt.compareSync(password, owner.passwordHash);
+      if (!matches) return res.status(401).json({ error: 'Invalid owner credentials.' });
+
+      const token = jwt.sign(
+        { role: 'owner', username: owner.username },
+        JWT_SECRET,
+        { expiresIn: '7d' }
+      );
+
+      return res.json({ success: true, token, role: 'owner', name: owner.name });
+    } else if (role === 'admin') {
       const admin = await db.findAdmin(username);
       if (!admin) return res.status(401).json({ error: 'Admin account not found.' });
+
+      if (admin.isActive === false) {
+        return res.status(403).json({ error: 'Admin account has been disabled by the Owner.' });
+      }
 
       const matches = bcrypt.compareSync(password, admin.passwordHash);
       if (!matches) return res.status(401).json({ error: 'Invalid admin credentials.' });
@@ -168,7 +186,7 @@ app.post('/api/auth/login', async (req, res) => {
         { expiresIn: '7d' }
       );
 
-      return res.json({ success: true, token, role: 'admin', hostelId: admin.hostelId, name: admin.name });
+      return res.json({ success: true, token, role: 'admin', hostelId: admin.hostelId, name: admin.name, paymentStatus: admin.paymentStatus || 'Pending' });
     } else {
       const student = await db.findStudent(username);
 
@@ -233,11 +251,11 @@ app.post('/api/auth/forgot-password', async (req, res) => {
       if (!admin || admin.name.toLowerCase() !== wardenName.toLowerCase()) {
         return res.status(404).json({ error: 'Admin account not found or details mismatch.' });
       }
-      
+
       const tempPassword = 'Admin@' + Math.floor(1000 + Math.random() * 9000);
       const newHash = bcrypt.hashSync(tempPassword, 10);
       await db.updateAdminPassword(admin.username, newHash);
-      
+
       return res.json({ success: true, message: `Simulated Email Sent! Your temporary password is: ${tempPassword}` });
     } else {
       if (!identifier || !email) return res.status(400).json({ error: 'Enrollment Number and Email are required.' });
@@ -248,7 +266,7 @@ app.post('/api/auth/forgot-password', async (req, res) => {
 
       const tempPassword = 'Student@' + Math.floor(1000 + Math.random() * 9000);
       const newHash = bcrypt.hashSync(tempPassword, 10);
-      
+
       await db.updateStudentInGlobalList({
         enrollment: student.enrollment,
         passwordHash: newHash,
@@ -278,6 +296,39 @@ app.post('/api/auth/forgot-password', async (req, res) => {
       }
       return res.json({ success: true, message: `Simulated Email Sent to ${email}! Your temporary password is: ${tempPassword}` });
     }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+// 3c. Owner Endpoints
+app.get('/api/owner/admins', authenticateToken, async (req, res) => {
+  try {
+    if (req.user.role !== 'owner') return res.status(403).json({ error: 'Owner access required.' });
+    const admins = await db.getAdmins();
+    const sanitized = admins.map(a => ({
+      username: a.username,
+      name: a.name,
+      title: a.title,
+      hostelId: a.hostelId,
+      isActive: a.isActive !== false
+    }));
+    res.json(sanitized);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+app.post('/api/owner/toggle-admin', authenticateToken, async (req, res) => {
+  try {
+    if (req.user.role !== 'owner') return res.status(403).json({ error: 'Owner access required.' });
+    const { username, isActive } = req.body;
+    if (!username) return res.status(400).json({ error: 'Username is required.' });
+
+    await db.toggleAdminStatus(username, isActive);
+    res.json({ success: true, message: `Admin ${username} is now ${isActive ? 'enabled' : 'disabled'}.` });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Internal Server Error' });
@@ -423,7 +474,7 @@ app.post('/api/hostel/approve-application', authenticateToken, async (req, res) 
     const students = tenantData.students || [];
     const existingStudIdx = students.findIndex(s => s.enrollment.toLowerCase() === app.enrollment.toLowerCase());
     const globalStudent = await db.findStudent(app.enrollment);
-    
+
     const studentObj = {
       enrollment: app.enrollment,
       name: app.name, email: app.email, phone: app.phone, parentPhone: app.parentPhone,
@@ -502,7 +553,7 @@ app.post('/api/auth/change-password', authenticateToken, async (req, res) => {
 
       const newHash = bcrypt.hashSync(newPassword, 10);
       await db.updateAdminPassword(username, newHash);
-      
+
       return res.json({ success: true, message: 'Admin password changed successfully!' });
     } else {
       const student = await db.findStudent(enrollment);
@@ -531,6 +582,96 @@ app.post('/api/auth/change-password', authenticateToken, async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+// 8. Owner APIs
+app.get('/api/owner/hostels', authenticateToken, async (req, res) => {
+  if (req.user.role !== 'owner') return res.status(403).json({ error: 'Access denied.' });
+  try {
+    const hostels = await db.getHostels();
+    const students = await db.getStudents();
+
+    const enrichedHostels = hostels.map(h => {
+      const hostelStudents = students.filter(s => s.hostelId === h.id);
+      return {
+        ...h,
+        totalStudents: hostelStudents.length
+      };
+    });
+
+    res.json(enrichedHostels);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch hostels.' });
+  }
+});
+
+app.delete('/api/owner/hostels/:id', authenticateToken, async (req, res) => {
+  if (req.user.role !== 'owner') return res.status(403).json({ error: 'Access denied.' });
+  try {
+    await db.deleteHostelData(req.params.id);
+    res.json({ success: true, message: 'Hostel and associated data deleted successfully.' });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to delete hostel.' });
+  }
+});
+
+app.post('/api/owner/update-payment', authenticateToken, async (req, res) => {
+  if (req.user.role !== 'owner') return res.status(403).json({ error: 'Access denied.' });
+  try {
+    const { username, paymentStatus } = req.body;
+    await db.updateAdminPaymentStatus(username, paymentStatus);
+    res.json({ success: true, message: `Payment status updated to ${paymentStatus}.` });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to update payment status.' });
+  }
+});
+
+app.post('/api/owner/bank-details', authenticateToken, async (req, res) => {
+  if (req.user.role !== 'owner') return res.status(403).json({ error: 'Access denied.' });
+  try {
+    await db.updateOwnerBankDetails(req.user.username, req.body.bankDetails);
+    res.json({ success: true, message: 'Bank details updated successfully.' });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to update bank details.' });
+  }
+});
+
+app.get('/api/owner/bank-details', authenticateToken, async (req, res) => {
+  try {
+    if (req.user.role === 'student') return res.status(403).json({ error: 'Access denied.' });
+    // Find the first owner or the default one
+    const Owner = db.Models.Owner;
+    const owner = await Owner.findOne({});
+    if (!owner) return res.status(404).json({ error: 'Owner not found.' });
+    res.json(owner.bankDetails || {});
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch bank details.' });
+  }
+});
+
+app.post('/api/owner/global-notice', authenticateToken, async (req, res) => {
+  if (req.user.role !== 'owner') return res.status(403).json({ error: 'Access denied.' });
+  try {
+    const { title, message } = req.body;
+    await db.createGlobalNotice({
+      id: 'GN-' + Date.now(),
+      title,
+      message,
+      date: new Date().toISOString().split('T')[0]
+    });
+    res.json({ success: true, message: 'Global notice sent successfully.' });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to create global notice.' });
+  }
+});
+
+app.get('/api/global-notices', async (req, res) => {
+  try {
+    const notices = await db.getGlobalNotices();
+    res.json(notices);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch global notices.' });
   }
 });
 

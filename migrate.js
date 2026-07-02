@@ -29,7 +29,7 @@ async function migrate() {
   // Migrate Hostels and Admins
   if (fs.existsSync(HOSTELS_FILE)) {
     const hostelsData = JSON.parse(fs.readFileSync(HOSTELS_FILE, 'utf8'));
-    
+
     if (hostelsData.list && hostelsData.list.length > 0) {
       await Hostel.insertMany(hostelsData.list);
       console.log(`✅ Migrated ${hostelsData.list.length} Hostels.`);
@@ -57,11 +57,11 @@ async function migrate() {
     for (const file of files) {
       if (file.endsWith('.json')) {
         const tenantData = JSON.parse(fs.readFileSync(path.join(TENANTS_DIR, file), 'utf8'));
-        
+
         // Ensure hostelId exists in the document
         if (!tenantData.hostelId) {
-            // infer hostelId from filename e.g. "hostel_123.json" -> "hostel_123"
-            tenantData.hostelId = file.replace('.json', '');
+          // infer hostelId from filename e.g. "hostel_123.json" -> "hostel_123"
+          tenantData.hostelId = file.replace('.json', '');
         }
 
         await Tenant.create(tenantData);

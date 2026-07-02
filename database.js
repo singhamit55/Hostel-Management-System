@@ -22,7 +22,24 @@ const AdminSchema = new mongoose.Schema({
   passwordHash: String,
   hostelId: String,
   name: String,
-  title: String
+  title: String,
+  isActive: { type: Boolean, default: true },
+  paymentStatus: { type: String, default: 'Pending' }
+});
+
+const OwnerSchema = new mongoose.Schema({
+  username: { type: String, required: true, unique: true },
+  passwordHash: String,
+  name: String,
+  bankDetails: { type: Object, default: {} }
+});
+
+const GlobalNoticeSchema = new mongoose.Schema({
+  id: { type: String, required: true, unique: true },
+  title: String,
+  message: String,
+  date: String,
+  author: { type: String, default: 'System Owner' }
 });
 
 const StudentSchema = new mongoose.Schema({
@@ -45,15 +62,17 @@ const StudentSchema = new mongoose.Schema({
 
 const TenantSchema = new mongoose.Schema({
   hostelId: { type: String, required: true, unique: true },
-  food_menu: { type: Object, default: { 
-    Monday: { breakfast: "", lunch: "", eveningSnack: "", dinner: "" },
-    Tuesday: { breakfast: "", lunch: "", eveningSnack: "", dinner: "" },
-    Wednesday: { breakfast: "", lunch: "", eveningSnack: "", dinner: "" },
-    Thursday: { breakfast: "", lunch: "", eveningSnack: "", dinner: "" },
-    Friday: { breakfast: "", lunch: "", eveningSnack: "", dinner: "" },
-    Saturday: { breakfast: "", lunch: "", eveningSnack: "", dinner: "" },
-    Sunday: { breakfast: "", lunch: "", eveningSnack: "", dinner: "" }
-  } },
+  food_menu: {
+    type: Object, default: {
+      Monday: { breakfast: "", lunch: "", eveningSnack: "", dinner: "" },
+      Tuesday: { breakfast: "", lunch: "", eveningSnack: "", dinner: "" },
+      Wednesday: { breakfast: "", lunch: "", eveningSnack: "", dinner: "" },
+      Thursday: { breakfast: "", lunch: "", eveningSnack: "", dinner: "" },
+      Friday: { breakfast: "", lunch: "", eveningSnack: "", dinner: "" },
+      Saturday: { breakfast: "", lunch: "", eveningSnack: "", dinner: "" },
+      Sunday: { breakfast: "", lunch: "", eveningSnack: "", dinner: "" }
+    }
+  },
   rooms: { type: Array, default: [] },
   attendance: { type: Array, default: [] },
   notices: { type: Array, default: [] },
@@ -75,16 +94,32 @@ const Hostel = mongoose.model('Hostel', HostelSchema);
 const Admin = mongoose.model('Admin', AdminSchema);
 const Student = mongoose.model('Student', StudentSchema);
 const Tenant = mongoose.model('Tenant', TenantSchema);
+const Owner = mongoose.model('Owner', OwnerSchema);
+const GlobalNotice = mongoose.model('GlobalNotice', GlobalNoticeSchema);
 
 const DB = {
   // Expose models if needed for migration scripts
-  Models: { Hostel, Admin, Student, Tenant },
+  Models: { Hostel, Admin, Student, Tenant, Owner, GlobalNotice },
 
   async init() {
     try {
       const uri = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/hostel-db';
       await mongoose.connect(uri);
       console.log('✅ Connected to MongoDB successfully.');
+
+      // Seed default Owner if not exists
+      const ownerCount = await Owner.countDocuments({});
+      if (ownerCount === 0 || !(await Owner.findOne({ username: 'singh321' }))) {
+        await Owner.deleteMany({}); // remove any previous default owners
+        const salt = bcrypt.genSaltSync(10);
+        const hash = bcrypt.hashSync('password', salt);
+        await Owner.create({
+          username: 'singh321',
+          passwordHash: hash,
+          name: 'System Owner'
+        });
+        console.log('✅ Seeded Owner account (singh321 / password).');
+      }
     } catch (err) {
       console.error('❌ Failed to connect to MongoDB:', err);
     }
@@ -106,10 +141,10 @@ const DB = {
 
   async createHostel(hostelObj, initialRooms = [], initialContacts = [], initialRules = []) {
     await Hostel.create(hostelObj);
-    
+
     const initialTenantData = {
       hostelId: hostelObj.id,
-      food_menu: { 
+      food_menu: {
         Monday: { breakfast: "", lunch: "", eveningSnack: "", dinner: "" },
         Tuesday: { breakfast: "", lunch: "", eveningSnack: "", dinner: "" },
         Wednesday: { breakfast: "", lunch: "", eveningSnack: "", dinner: "" },
@@ -159,6 +194,18 @@ const DB = {
       { username: { $regex: new RegExp(`^${username}$`, 'i') } },
       { $set: { passwordHash: newHash } }
     );
+  },
+
+  async toggleAdminStatus(username, status) {
+    await Admin.updateOne(
+      { username: { $regex: new RegExp(`^${username}$`, 'i') } },
+      { $set: { isActive: status } }
+    );
+  },
+
+  async findOwner(username) {
+    if (!username) return null;
+    return await Owner.findOne({ username: { $regex: new RegExp(`^${username}$`, 'i') } }).lean();
   },
 
   async getStudents() {
@@ -221,6 +268,35 @@ const DB = {
         }
       }
     }
+  },
+
+  async getGlobalNotices() {
+    return await GlobalNotice.find({}).sort({ _id: -1 }).lean();
+  },
+
+  async createGlobalNotice(noticeData) {
+    await GlobalNotice.create(noticeData);
+  },
+
+  async updateAdminPaymentStatus(username, status) {
+    await Admin.updateOne(
+      { username: { $regex: new RegExp(`^${username}$`, 'i') } },
+      { $set: { paymentStatus: status } }
+    );
+  },
+
+  async deleteHostelData(hostelId) {
+    await Hostel.deleteOne({ id: hostelId });
+    await Admin.deleteMany({ hostelId });
+    await Student.deleteMany({ hostelId });
+    await Tenant.deleteOne({ hostelId });
+  },
+
+  async updateOwnerBankDetails(username, bankDetails) {
+    await Owner.updateOne(
+      { username: { $regex: new RegExp(`^${username}$`, 'i') } },
+      { $set: { bankDetails } }
+    );
   }
 };
 
