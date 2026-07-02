@@ -1,0 +1,1897 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hostel Management System</title>
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Custom Stylesheet -->
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+
+<body>
+
+  <!-- Dynamic Background Blobs for Glassmorphic Visuals -->
+  <div class="bg-blobs">
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+  </div>
+
+  <!-- Login Page Container -->
+  <div id="login-container">
+    <div class="login-card">
+      <div style="text-align: center; margin-bottom: 24px;">
+        <span style="font-size: 3rem; display: block; margin-bottom: 8px;">🏠</span>
+        <h2 style="font-size: 1.8rem; font-family: 'Outfit', sans-serif; color: var(--text-primary);"
+          id="login-title-text">HMS Portal</h2>
+        <p style="color: var(--text-secondary); font-size: 0.85rem; margin-top: 4px;" id="login-subtitle-text">Hostel
+          Management System Login</p>
+      </div>
+
+      <!-- Login Role Selector Toggle -->
+      <div class="login-role-switch" id="login-role-selector">
+        <button class="login-role-btn active" id="login-role-student">Student</button>
+        <button class="login-role-btn" id="login-role-admin">Admin</button>
+      </div>
+
+      <!-- Login Form -->
+      <form id="login-form">
+        <div class="form-group">
+          <label for="login-username" id="login-username-label">Enrollment Number</label>
+          <input type="text" class="form-control" id="login-username" placeholder="e.g. ENR20240921" required>
+        </div>
+        <div class="form-group">
+          <label for="login-password">Password</label>
+          <input type="password" class="form-control" id="login-password" placeholder="••••••••" required>
+        </div>
+        <div class="form-group" style="text-align: right; margin-top: -5px; margin-bottom: 10px;">
+          <span id="btn-show-forgot" style="color: var(--accent-primary); font-size: 0.8rem; font-weight: 600; cursor: pointer; text-decoration: underline;">Forgot Password?</span>
+        </div>
+        <button type="submit" class="submit-btn" style="width: 100%; margin-top: 10px;">Sign In</button>
+      </form>
+
+      <!-- Forgot Password Form (Hidden by default) -->
+      <form id="forgot-password-form" style="display: none; max-height: 380px; overflow-y: auto; padding-right: 8px; margin-bottom: 16px;">
+        <div style="text-align: center; margin-bottom: 15px;">
+          <h3 style="font-size: 1.2rem; color: var(--text-primary);">Reset Password</h3>
+          <p style="font-size: 0.85rem; color: var(--text-secondary);">Enter your details to receive a temporary password.</p>
+        </div>
+        <div class="form-group">
+          <label for="forgot-role">Account Type</label>
+          <select class="form-control" id="forgot-role" required>
+            <option value="student">Student</option>
+            <option value="admin">Admin</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="forgot-identifier" id="forgot-identifier-label">Enrollment Number</label>
+          <input type="text" class="form-control" id="forgot-identifier" placeholder="e.g. ENR20240921" required>
+        </div>
+        <div class="form-group">
+          <label for="forgot-email" id="forgot-email-label">Registered Email</label>
+          <input type="text" class="form-control" id="forgot-email" placeholder="e.g. rahul@hostel.com" required>
+        </div>
+        <button type="submit" class="submit-btn" style="width: 100%; margin-top: 10px;">Send Reset Link</button>
+        <div style="text-align: center; margin-top: 15px;">
+          <span id="btn-back-to-login" style="color: var(--text-secondary); font-size: 0.85rem; cursor: pointer; text-decoration: underline;">Back to Login</span>
+        </div>
+      </form>
+
+      <!-- Registration Form (Hidden by default) -->
+      <form id="register-form"
+        style="display: none; max-height: 380px; overflow-y: auto; padding-right: 8px; margin-bottom: 16px;">
+        <!-- Hostel Access Code - must validate first -->
+        <div class="form-group"
+          style="background: rgba(37,99,235,0.07); border: 1px solid rgba(37,99,235,0.3); border-radius: 10px; padding: 14px 16px; margin-bottom: 14px;">
+          <label for="reg-access-code" style="font-size: 0.85rem; font-weight: 700; color: var(--accent-primary);">🔑
+            Hostel Access Code</label>
+          <input type="text" class="form-control" id="reg-access-code"
+            placeholder="Enter the unique code given by your hostel warden" required
+            style="margin-top: 6px; font-weight: 700; letter-spacing: 0.05em;">
+          <p style="font-size: 0.72rem; color: var(--text-muted); margin-top: 6px;">This code is provided by your hostel
+            warden. Wrong code = application rejected.</p>
+        </div>
+        <div class="form-group">
+          <label for="reg-name">Full Name</label>
+          <input type="text" class="form-control" id="reg-name" placeholder="e.g. Rahul Patel" required>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="reg-enrollment">Enrollment Number</label>
+            <input type="text" class="form-control" id="reg-enrollment" placeholder="e.g. ENR20240925" required>
+          </div>
+          <div class="form-group">
+            <label for="reg-email">Email Address</label>
+            <input type="email" class="form-control" id="reg-email" placeholder="e.g. rahul@hostel.com" required>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="reg-phone">Phone Number</label>
+            <input type="text" class="form-control" id="reg-phone" placeholder="e.g. +91 98765 43210" required>
+          </div>
+          <div class="form-group">
+            <label for="reg-parent">Parent Contact</label>
+            <input type="text" class="form-control" id="reg-parent" placeholder="e.g. +91 98765 01234" required>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="reg-course">Course</label>
+            <input type="text" class="form-control" id="reg-course" placeholder="e.g. B.Tech CS" required>
+          </div>
+          <div class="form-group">
+            <label for="reg-year">Academic Year</label>
+            <select class="form-control" id="reg-year" required>
+              <option value="1st Year">1st Year</option>
+              <option value="2nd Year">2nd Year</option>
+              <option value="3rd Year">3rd Year</option>
+              <option value="4th Year">4th Year</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="reg-blood">Blood Group</label>
+            <select class="form-control" id="reg-blood" required>
+              <option value="A+">A+</option>
+              <option value="A-">A-</option>
+              <option value="B+">B+</option>
+              <option value="B-">B-</option>
+              <option value="O+">O+</option>
+              <option value="O-">O-</option>
+              <option value="AB+">AB+</option>
+              <option value="AB-">AB-</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="reg-id-type">Government ID Type</label>
+            <select class="form-control" id="reg-id-type" required onchange="updateIdPlaceholder()">
+              <option value="" disabled selected>-- Select ID Type --</option>
+              <option value="Aadhaar">Aadhaar Card</option>
+              <option value="Passport">Passport</option>
+              <option value="Citizenship">Citizenship Number</option>
+              <option value="VoterID">Voter ID</option>
+              <option value="DrivingLicense">Driving License</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="reg-aadhaar"><span id="reg-id-label">ID Number</span> <span
+                style="font-size:0.78rem; color:var(--text-muted);">(Required)</span></label>
+            <input type="text" class="form-control" id="reg-aadhaar" placeholder="e.g. 1234-5678-9012" required>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="reg-address">Permanent Address</label>
+          <input type="text" class="form-control" id="reg-address" placeholder="e.g. 12, Main Street, City" required>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="reg-photo">Profile Photo</label>
+            <input type="file" class="form-control" id="reg-photo" accept="image/*">
+          </div>
+          <div class="form-group">
+            <label for="reg-aadhaar-doc">ID Document Upload (PDF/Image)</label>
+            <input type="file" class="form-control" id="reg-aadhaar-doc" accept="image/*,application/pdf">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="reg-password">Password</label>
+          <input type="password" class="form-control" id="reg-password" placeholder="••••••••" required>
+        </div>
+        <button type="submit" class="submit-btn" style="width: 100%; margin-top: 10px;">Submit Registration
+          Application</button>
+      </form>
+
+      <!-- Admin Registration Form (Hidden by default) -->
+      <form id="admin-register-form"
+        style="display: none; max-height: 380px; overflow-y: auto; padding-right: 8px; margin-bottom: 16px;">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="admin-reg-name">Warden Name</label>
+            <input type="text" class="form-control" id="admin-reg-name" placeholder="e.g. Dr. Sanjay Kumar" required>
+          </div>
+          <div class="form-group">
+            <label for="admin-reg-title">Warden Office / Designation</label>
+            <input type="text" class="form-control" id="admin-reg-title" placeholder="e.g. Chief Warden" required>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="admin-reg-username">Admin Username</label>
+            <input type="text" class="form-control" id="admin-reg-username" placeholder="e.g. admin" required>
+          </div>
+          <div class="form-group">
+            <label for="admin-reg-password">Admin Password</label>
+            <input type="password" class="form-control" id="admin-reg-password" placeholder="••••••••" required>
+          </div>
+        </div>
+
+        <!-- Toggle Reconfigure checkbox -->
+        <div class="form-group"
+          style="display: flex; align-items: center; gap: 8px; margin-top: 15px; padding-top: 15px; border-top: 1px solid var(--glass-border);">
+          <input type="checkbox" id="admin-reg-reconfig" style="width: 18px; height: 18px; cursor: pointer;" checked>
+          <label for="admin-reg-reconfig"
+            style="font-size: 0.85rem; font-weight: 600; cursor: pointer; color: var(--text-primary);">Configure /
+            Overwrite Hostel Space & Rooms</label>
+        </div>
+
+        <div id="admin-reg-config-fields">
+          <div style="margin: 15px 0 10px 0;">
+            <h4 style="font-size: 0.9rem; font-weight: 700; color: var(--accent-primary);">Hostel Configuration Details
+            </h4>
+          </div>
+
+          <!-- Unique Hostel Access Code -->
+          <div class="form-group"
+            style="background: rgba(37,99,235,0.07); border: 1px solid rgba(37,99,235,0.25); border-radius: 10px; padding: 14px 16px; margin-bottom: 14px;">
+            <label for="admin-reg-access-code"
+              style="font-size: 0.85rem; font-weight: 700; color: var(--accent-primary);">🔑 Unique Hostel Access
+              Code</label>
+            <input type="text" class="form-control" id="admin-reg-access-code" placeholder="e.g. KP26-BOYS-2024"
+              required style="margin-top: 6px; font-weight: 700; letter-spacing: 0.05em;">
+            <p style="font-size: 0.72rem; color: var(--text-muted); margin-top: 6px;">Students must enter this exact
+              code during registration to apply for this hostel. Share only with eligible students.</p>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="admin-reg-hostel-name">Hostel Name</label>
+              <input type="text" class="form-control" id="admin-reg-hostel-name"
+                placeholder="e.g. Grand Heritage Hostel" required>
+            </div>
+            <div class="form-group">
+              <label for="admin-reg-hostel-address">Hostel Address</label>
+              <input type="text" class="form-control" id="admin-reg-hostel-address"
+                placeholder="e.g. Sector 15, Knowledge Park" required>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="admin-reg-total-rooms">Number of Rooms Total</label>
+              <input type="number" class="form-control" id="admin-reg-total-rooms" placeholder="e.g. 120" min="1"
+                required>
+            </div>
+            <div class="form-group">
+              <label for="admin-reg-seater">Room Seater / Capacity</label>
+              <select class="form-control" id="admin-reg-seater" required>
+                <option value="1">1 Seater (Single Room)</option>
+                <option value="2" selected>2 Seater (Double Sharing)</option>
+                <option value="3">3 Seater (Triple Sharing)</option>
+                <option value="4">4 Seater (Quad Sharing)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="admin-reg-ac">Room AC Type</label>
+              <select class="form-control" id="admin-reg-ac" required>
+                <option value="AC">AC Rooms</option>
+                <option value="Non-AC">Non-AC Rooms</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="admin-reg-blocks">Blocks (Comma-separated)</label>
+              <input type="text" class="form-control" id="admin-reg-blocks" placeholder="e.g. A, B, C">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="admin-reg-rooms-per-block">Rooms per Block</label>
+            <input type="number" class="form-control" id="admin-reg-rooms-per-block" placeholder="e.g. 40" min="1">
+          </div>
+          <div class="form-row" style="margin-top: 15px;">
+            <div class="form-group">
+              <label for="admin-reg-bg-image">Hostel Backside Background Image</label>
+              <input type="file" class="form-control" id="admin-reg-bg-image" accept="image/*">
+            </div>
+            <div class="form-group">
+              <label for="admin-reg-dash-image">Dashboard Welcome Banner Image</label>
+              <input type="file" class="form-control" id="admin-reg-dash-image" accept="image/*">
+            </div>
+          </div>
+        </div>
+
+        <button type="submit" class="submit-btn" style="width: 100%; margin-top: 10px;">Register Admin & Configure
+          Hostel</button>
+      </form>
+
+      <!-- Toggle Switch for Login vs Register -->
+      <div style="text-align: center; margin-top: 20px;" id="login-toggle-wrap">
+        <p style="font-size: 0.85rem; color: var(--text-secondary);" id="toggle-desc-text">
+          Don't have an account? <span id="btn-show-register"
+            style="color: var(--accent-primary); font-weight: 600; cursor: pointer; text-decoration: underline;">Register
+            Now</span>
+        </p>
+      </div>
+
+      <!-- Help text area (empty/hidden by default) -->
+      <div class="login-help-text" id="login-help-text" style="display: none;"></div>
+    </div>
+  </div>
+
+  <div id="app-container" style="display: none;">
+
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <span class="sidebar-logo">🏠</span>
+        <h1 class="sidebar-title" id="sidebar-brand-name">Hostel Management</h1>
+      </div>
+
+      <ul class="sidebar-menu" id="sidebar-menu">
+        <!-- Student Sidebar Menu Items -->
+        <li class="menu-item active" data-target="dashboard" data-role="student">
+          <i class="fa-solid fa-house"></i>
+          <span>Dashboard</span>
+        </li>
+        <li class="menu-item" data-target="profile" data-role="student">
+          <i class="fa-solid fa-user"></i>
+          <span>My Profile</span>
+        </li>
+        <li class="menu-item" data-target="room" data-role="student">
+          <i class="fa-solid fa-bed"></i>
+          <span>My Room</span>
+        </li>
+        <li class="menu-item" data-target="food" data-role="student">
+          <i class="fa-solid fa-utensils"></i>
+          <span>Food Menu</span>
+        </li>
+        <li class="menu-item" data-target="attendance" data-role="student">
+          <i class="fa-solid fa-calendar-days"></i>
+          <span>Attendance</span>
+        </li>
+        <li class="menu-item" data-target="notices" data-role="student">
+          <i class="fa-solid fa-bullhorn"></i>
+          <span>Notices</span>
+        </li>
+        <li class="menu-item" data-target="complaints" data-role="student">
+          <i class="fa-solid fa-circle-exclamation"></i>
+          <span>Complaints</span>
+        </li>
+        <li class="menu-item" data-target="fines" data-role="student">
+          <i class="fa-solid fa-indian-rupee-sign"></i>
+          <span>Fines & Payments</span>
+        </li>
+        <li class="menu-item" data-target="leaves" data-role="student">
+          <i class="fa-solid fa-file-signature"></i>
+          <span>Leave Application</span>
+        </li>
+
+        <!-- Admin Sidebar Menu Items (will be shown/hidden dynamically) -->
+        <li class="menu-item" data-target="admin-dashboard" data-role="admin" style="display: none;">
+          <i class="fa-solid fa-chart-line"></i>
+          <span>Admin Dashboard</span>
+        </li>
+        <li class="menu-item" data-target="admin-applications" data-role="admin"
+          style="display: none; align-items: center; justify-content: space-between; width: 100%;">
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <i class="fa-solid fa-file-signature"></i>
+            <span>Registration Apps</span>
+          </div>
+          <span class="badge warning" id="admin-apps-badge"
+            style="display: none; padding: 2px 8px; font-size: 0.75rem; border-radius: 10px; margin-right: 8px;">0</span>
+        </li>
+        <li class="menu-item" data-target="admin-menu" data-role="admin" style="display: none;">
+          <i class="fa-solid fa-utensils"></i>
+          <span>Manage Menu</span>
+        </li>
+        <li class="menu-item" data-target="admin-notices" data-role="admin" style="display: none;">
+          <i class="fa-solid fa-bullhorn"></i>
+          <span>Manage Notices</span>
+        </li>
+        <li class="menu-item" data-target="admin-complaints" data-role="admin" style="display: none;">
+          <i class="fa-solid fa-triangle-exclamation"></i>
+          <span>Complaints Panel</span>
+        </li>
+        <li class="menu-item" data-target="admin-leaves" data-role="admin" style="display: none;">
+          <i class="fa-solid fa-envelope-open-text"></i>
+          <span>Leave Requests</span>
+        </li>
+        <li class="menu-item" data-target="admin-students" data-role="admin" style="display: none;">
+          <i class="fa-solid fa-users"></i>
+          <span>Student Search</span>
+        </li>
+        <li class="menu-item" data-target="admin-allocation" data-role="admin" style="display: none;">
+          <i class="fa-solid fa-bed"></i>
+          <span>Room Allocation</span>
+        </li>
+        <li class="menu-item" data-target="admin-visitors" data-role="admin" style="display: none;">
+          <i class="fa-solid fa-address-book"></i>
+          <span>Visitor Register</span>
+        </li>
+
+        <!-- Shared Menu Items -->
+        <li class="menu-item" data-target="settings">
+          <i class="fa-solid fa-gear"></i>
+          <span>Settings</span>
+        </li>
+        <li class="menu-item" data-target="about">
+          <i class="fa-solid fa-circle-info"></i>
+          <span>About Hostel</span>
+        </li>
+      </ul>
+
+      <div class="sidebar-footer">
+        <div class="menu-item" id="logout-btn">
+          <i class="fa-solid fa-right-from-bracket"></i>
+          <span>Logout</span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Sidebar Backdrop Overlay for Mobile -->
+    <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+    <!-- Main Wrapper -->
+    <main class="main-wrapper">
+
+      <!-- Top Header Bar -->
+      <header class="top-header">
+        <div class="header-left">
+          <div class="menu-toggle" id="menu-toggle">
+            <i class="fa-solid fa-bars"></i>
+          </div>
+          <h2 id="page-title">Dashboard</h2>
+        </div>
+
+        <div class="header-right">
+          <!-- Role Switcher (Student <-> Admin) -->
+          <div class="role-switch-container">
+            <button class="role-btn active" id="role-btn-student">Student</button>
+            <button class="role-btn" id="role-btn-admin">Admin</button>
+          </div>
+
+          <!-- Notification Center -->
+          <div class="notification-container">
+            <button class="icon-btn" id="notification-bell">
+              <i class="fa-regular fa-bell"></i>
+              <span class="badge-dot" id="notif-dot" style="display: none;"></span>
+            </button>
+            <div class="notification-dropdown" id="notification-dropdown">
+              <div class="notification-header">
+                <h4>Notifications</h4>
+                <span id="clear-notifications">Clear All</span>
+              </div>
+              <div class="notification-list" id="notification-list">
+                <!-- Dynamically loaded notification items -->
+              </div>
+            </div>
+          </div>
+
+          <!-- User Details Preview -->
+          <div class="user-profile-preview" id="user-preview">
+            <div class="user-avatar" id="header-avatar">RP</div>
+            <div class="user-info-text">
+              <span class="user-name-label" id="header-username">Rahul Patel</span>
+              <span class="user-role-label" id="header-userrole">Room 203 | Block B</span>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- ============================================== -->
+      <!-- STUDENT DYNAMIC VIEWS -->
+      <!-- ============================================== -->
+
+      <!-- 1. STUDENT DASHBOARD -->
+      <section class="page-content active" id="view-dashboard">
+        <!-- Welcome Banner Card -->
+        <div class="info-card" id="student-welcome-banner-card"
+          style="margin-bottom: 24px; padding: 20px 24px; display: flex; align-items: center; justify-content: space-between; border-left: 6px solid var(--accent-primary);">
+          <div>
+            <h2 style="font-size: 1.6rem; font-family: 'Outfit', sans-serif;" id="dash-welcome-text">👋 Welcome, Rahul
+              Patel</h2>
+            <p style="color: var(--text-secondary); font-size: 0.95rem; margin-top: 4px;" id="dash-welcome-room">Room
+              No: 203 | Block B</p>
+            <p style="color: var(--text-muted); font-size: 0.8rem; margin-top: 4px;" id="dash-welcome-hostel"><i
+                class="fa-solid fa-hotel"></i> Grand Heritage Boys Hostel</p>
+          </div>
+
+        </div>
+
+        <!-- Dashboard Summary Stats: Exactly 3 cards -->
+        <div class="summary-grid">
+          <div class="summary-card">
+            <div class="summary-card-info">
+              <h3>Total Rooms</h3>
+              <div class="count" id="student-stat-rooms">120</div>
+            </div>
+            <div class="summary-card-icon color-primary">
+              <i class="fa-solid fa-hotel"></i>
+            </div>
+          </div>
+          <div class="summary-card">
+            <div class="summary-card-info">
+              <h3>Students</h3>
+              <div class="count" id="student-stat-students">256</div>
+            </div>
+            <div class="summary-card-icon color-secondary">
+              <i class="fa-solid fa-graduation-cap"></i>
+            </div>
+          </div>
+          <div class="summary-card">
+            <div class="summary-card-info">
+              <h3>Vacant Rooms</h3>
+              <div class="count" id="student-stat-vacant">24</div>
+            </div>
+            <div class="summary-card-icon color-danger">
+              <i class="fa-solid fa-door-open"></i>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick Actions Row -->
+        <div class="quick-actions-bar">
+          <h4>Quick Actions</h4>
+          <div class="action-buttons">
+            <button class="action-btn" data-action="quick-complaint">
+              <i class="fa-solid fa-circle-exclamation"></i> Raise Complaint
+            </button>
+            <button class="action-btn" data-action="quick-leave">
+              <i class="fa-solid fa-file-signature"></i> Apply Leave
+            </button>
+            <button class="action-btn" data-action="quick-attendance">
+              <i class="fa-solid fa-calendar-days"></i> Scan QR Attendance
+            </button>
+            <button class="action-btn" data-action="quick-fine" id="dash-quick-fine">
+              <i class="fa-solid fa-indian-rupee-sign"></i> Pay Fine
+            </button>
+          </div>
+        </div>
+
+        <!-- Details layout (Two columns) -->
+        <div class="dashboard-details-layout">
+          <!-- Left Column (Food Menu) -->
+          <div class="info-card">
+            <div class="section-title-wrap">
+              <h3>🍽 Today's Food Menu</h3>
+              <span class="view-all-link" data-link="food">View Details</span>
+            </div>
+            <div class="menu-card-layout" id="dash-menu-grid">
+              <!-- Rendered via JS -->
+            </div>
+          </div>
+
+          <!-- Right Column (Notices, Fine, Complaints) -->
+          <div class="notice-complaint-fine-grid" style="display: flex; flex-direction: column; gap: 24px;">
+            <!-- Latest Notice Card -->
+            <div class="info-card">
+              <div class="section-title-wrap">
+                <h3>📢 Latest Notice</h3>
+                <span class="view-all-link" data-link="notices">All Notices</span>
+              </div>
+              <div id="dash-latest-notice">
+                <!-- Rendered via JS -->
+              </div>
+            </div>
+
+            <!-- Urgent alerts: Fine & Complaint Status -->
+            <div class="info-card">
+              <h3>⚠️ Status & Alerts</h3>
+              <div style="display: flex; flex-direction: column; gap: 16px; margin-top: 16px;">
+                <!-- Pending Fine Alert -->
+                <div id="dash-fine-alert"
+                  style="display: flex; justify-content: space-between; align-items: center; padding: 12px; background: var(--danger-bg); border: 1px solid var(--danger); border-radius: 12px;">
+                  <div>
+                    <span style="font-weight: 700; color: var(--danger); font-size: 0.95rem;">Pending Fine</span>
+                    <p style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 4px;">Due for late entry</p>
+                  </div>
+                  <div style="text-align: right;">
+                    <span style="font-weight: 800; font-size: 1.1rem; color: var(--text-primary);"
+                      id="dash-fine-val">₹200</span>
+                    <button class="action-btn btn-secondary"
+                      style="padding: 4px 12px; font-size: 0.75rem; border-radius: 50px; margin-top: 6px; display: block;"
+                      id="dash-btn-pay-fine">Pay Now</button>
+                  </div>
+                </div>
+
+                <!-- Complaint Status Tracking -->
+                <div
+                  style="display: flex; justify-content: space-between; align-items: center; padding: 12px; background: rgba(148, 163, 184, 0.08); border: 1px solid var(--glass-border); border-radius: 12px;">
+                  <div>
+                    <span style="font-weight: 700; font-size: 0.95rem;" id="dash-complaint-title">Complaint
+                      Status</span>
+                    <p style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 4px;"
+                      id="dash-complaint-desc">1 Complaint logged</p>
+                  </div>
+                  <div>
+                    <span class="badge inprogress" id="dash-complaint-badge">In Progress</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 2. MY PROFILE -->
+      <section class="page-content" id="view-profile">
+        <div class="profile-hero">
+          <div class="profile-avatar-large" id="profile-avatar">RP</div>
+          <div class="profile-summary-info">
+            <h2 id="profile-name">Rahul Patel</h2>
+            <p id="profile-enrollment">Enrollment No: ENR20240921</p>
+            <p style="margin-top: 8px;"></p>
+          </div>
+        </div>
+
+        <div class="card-grid">
+          <div class="info-card">
+            <h3>Contact Information</h3>
+            <div style="margin-top: 16px;">
+              <div class="detail-row">
+                <span class="detail-label">Mobile Number</span>
+                <span class="detail-value" id="profile-mobile">+91 98765 43210</span>
+              </div>
+              <div class="detail-row">
+                <span class="detail-label">Email Address</span>
+                <span class="detail-value" id="profile-email">rahul.patel@hostel.com</span>
+              </div>
+              <div class="detail-row">
+                <span class="detail-label">Parent's Contact</span>
+                <span class="detail-value" id="profile-parent">+91 98765 01234</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="info-card">
+            <h3>Academic & Room Details</h3>
+            <div style="margin-top: 16px;">
+              <div class="detail-row">
+                <span class="detail-label">Course / Program</span>
+                <span class="detail-value" id="profile-course">B.Tech Computer Science</span>
+              </div>
+              <div class="detail-row">
+                <span class="detail-label">Current Academic Year</span>
+                <span class="detail-value" id="profile-year">3rd Year</span>
+              </div>
+              <div class="detail-row">
+                <span class="detail-label">Room Allocation</span>
+                <span class="detail-value" id="profile-room">Room 203 (Block B)</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 3. MY ROOM -->
+      <section class="page-content" id="view-room">
+        <div class="card-grid">
+          <div class="info-card">
+            <h3>Room Details</h3>
+            <div style="margin-top: 16px;">
+              <div class="detail-row">
+                <span class="detail-label">Room Number</span>
+                <span class="detail-value" id="room-number-val">203</span>
+              </div>
+              <div class="detail-row">
+                <span class="detail-label">Floor</span>
+                <span class="detail-value" id="room-floor-val">2nd Floor</span>
+              </div>
+              <div class="detail-row">
+                <span class="detail-label">Block</span>
+                <span class="detail-value" id="room-block-val">Block B</span>
+              </div>
+              <div class="detail-row">
+                <span class="detail-label">Status</span>
+                <span class="detail-value"><span class="badge inprogress" id="room-status-badge">Fully
+                    Occupied</span></span>
+              </div>
+            </div>
+          </div>
+
+          <div class="info-card">
+            <h3>Roommates</h3>
+            <div class="roommates-grid" id="roommates-container">
+              <!-- Rendered via JS -->
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 4. FOOD MENU -->
+      <section class="page-content" id="view-food">
+        <div class="info-card">
+          <div class="tab-controls">
+            <button class="tab-btn active" data-tab="breakfast">🌅 Breakfast</button>
+            <button class="tab-btn" data-tab="lunch">🍛 Lunch</button>
+            <button class="tab-btn" data-tab="eveningSnack">☕ Evening Snack</button>
+            <button class="tab-btn" data-tab="dinner">🌙 Dinner</button>
+          </div>
+
+          <div class="tab-content active" id="tab-breakfast" style="text-align: center; padding: 40px 20px;">
+            <i class="fa-solid fa-mug-saucer" style="font-size: 4rem; color: #f59e0b; margin-bottom: 20px;"></i>
+            <h3 style="font-size: 1.5rem; margin-bottom: 8px;">Breakfast Menu</h3>
+            <p style="font-size: 1.2rem; color: var(--text-secondary); max-width: 400px; margin: 0 auto;"
+              id="menu-txt-breakfast">Poha, Milk, Sprouts</p>
+          </div>
+
+          <div class="tab-content" id="tab-lunch" style="text-align: center; padding: 40px 20px;">
+            <i class="fa-solid fa-bowl-food" style="font-size: 4rem; color: #10b981; margin-bottom: 20px;"></i>
+            <h3 style="font-size: 1.5rem; margin-bottom: 8px;">Lunch Menu</h3>
+            <p style="font-size: 1.2rem; color: var(--text-secondary); max-width: 400px; margin: 0 auto;"
+              id="menu-txt-lunch">Rice, Dal, Seasonal Sabji, Roti, Salad</p>
+          </div>
+
+          <div class="tab-content" id="tab-eveningSnack" style="text-align: center; padding: 40px 20px;">
+            <i class="fa-solid fa-cookie" style="font-size: 4rem; color: #3b82f6; margin-bottom: 20px;"></i>
+            <h3 style="font-size: 1.5rem; margin-bottom: 8px;">Evening Snack Menu</h3>
+            <p style="font-size: 1.2rem; color: var(--text-secondary); max-width: 400px; margin: 0 auto;"
+              id="menu-txt-eveningSnack">Tea, Veg Sandwich, Biscuits</p>
+          </div>
+
+          <div class="tab-content" id="tab-dinner" style="text-align: center; padding: 40px 20px;">
+            <i class="fa-solid fa-utensils" style="font-size: 4rem; color: #8b5cf6; margin-bottom: 20px;"></i>
+            <h3 style="font-size: 1.5rem; margin-bottom: 8px;">Dinner Menu</h3>
+            <p style="font-size: 1.2rem; color: var(--text-secondary); max-width: 400px; margin: 0 auto;"
+              id="menu-txt-dinner">Roti, Paneer Butter Masala, Dal Tadka, Sweet</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- 5. ATTENDANCE -->
+      <section class="page-content" id="view-attendance">
+        <div class="attendance-overview-wrapper">
+          <!-- Stats Summary -->
+          <div class="attendance-stats-strip">
+            <div class="attendance-mini-card" style="border-left: 4px solid var(--success);">
+              <h5>Present Days</h5>
+              <div class="val" id="attend-present-val">22</div>
+            </div>
+            <div class="attendance-mini-card" style="border-left: 4px solid var(--danger);">
+              <h5>Absent Days</h5>
+              <div class="val" id="attend-absent-val">2</div>
+            </div>
+            <button class="submit-btn" id="btn-qr-attendance"
+              style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 10px;">
+              <i class="fa-solid fa-qrcode"></i> Scan QR Attendance
+            </button>
+          </div>
+
+          <!-- Chart Holder -->
+          <div class="info-card">
+            <h3>Monthly Attendance Chart</h3>
+            <div class="chart-holder" style="margin-top: 16px;">
+              <canvas id="attendanceChart"></canvas>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 6. NOTICES -->
+      <section class="page-content" id="view-notices">
+        <div class="info-card">
+          <h3>Latest Hostel Announcements</h3>
+          <div class="notice-list" style="margin-top: 20px;" id="notices-list-container">
+            <!-- Rendered via JS -->
+          </div>
+        </div>
+      </section>
+
+      <!-- 7. COMPLAINTS -->
+      <section class="page-content" id="view-complaints">
+        <div class="card-grid">
+          <!-- Submit Complaint Form -->
+          <div class="info-card">
+            <h3>📝 File a Complaint</h3>
+            <form id="complaint-form" style="margin-top: 16px;">
+              <div class="form-group">
+                <label for="complaint-title">Complaint Title</label>
+                <input type="text" class="form-control" id="complaint-title"
+                  placeholder="e.g., Water Leakage in Room B203" required>
+              </div>
+
+              <div class="form-group">
+                <label for="complaint-type">Complaint Category</label>
+                <select class="form-control" id="complaint-type" required>
+                  <option value="">Select Category</option>
+                  <option value="Plumbing">Plumbing</option>
+                  <option value="Electrical">Electrical</option>
+                  <option value="Furniture">Furniture</option>
+                  <option value="Mess / Food">Mess / Food</option>
+                  <option value="Housekeeping">Housekeeping</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="complaint-desc">Description</label>
+                <textarea class="form-control" id="complaint-desc" placeholder="Describe your issue in detail..."
+                  required></textarea>
+              </div>
+
+              <div class="form-group">
+                <label for="complaint-photo">Upload Proof (Photo)</label>
+                <input type="file" class="form-control" id="complaint-photo" accept="image/*">
+                <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 4px;">Supported formats: JPG, PNG.
+                  Max size 2MB (Simulated)</p>
+              </div>
+
+              <button type="submit" class="submit-btn" style="width: 100%;">Submit Complaint</button>
+            </form>
+          </div>
+
+          <!-- Log Tracker -->
+          <div class="info-card">
+            <h3>Track Submitted Complaints</h3>
+            <div style="display: flex; flex-direction: column; gap: 14px; margin-top: 16px;"
+              id="complaints-tracker-list">
+              <!-- Rendered via JS -->
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 8. FINES & PAYMENTS -->
+      <section class="page-content" id="view-fines">
+        <div class="info-card">
+          <h3>Fines Details</h3>
+          <div style="margin-top: 20px;" class="table-responsive">
+            <table class="custom-table">
+              <thead>
+                <tr>
+                  <th>Fine Reason</th>
+                  <th>Amount</th>
+                  <th>Due Date</th>
+                  <th>Status</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="fines-table-body">
+                <!-- Rendered via JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- 9. LEAVE APPLICATION -->
+      <section class="page-content" id="view-leaves">
+        <div class="card-grid">
+          <!-- Application Form -->
+          <div class="info-card">
+            <h3>📄 Leave Application Form</h3>
+            <form id="leave-form" style="margin-top: 16px;">
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="leave-from">From Date</label>
+                  <input type="date" class="form-control" id="leave-from" required>
+                </div>
+                <div class="form-group">
+                  <label for="leave-to">To Date</label>
+                  <input type="date" class="form-control" id="leave-to" required>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="leave-reason">Reason for Leave</label>
+                <textarea class="form-control" id="leave-reason" placeholder="State your reason..." required></textarea>
+              </div>
+
+              <button type="submit" class="submit-btn" style="width: 100%;">Submit Application</button>
+            </form>
+          </div>
+
+          <!-- History -->
+          <div class="info-card">
+            <h3>Application History</h3>
+            <div style="display: flex; flex-direction: column; gap: 14px; margin-top: 16px;" id="leaves-history-list">
+              <!-- Rendered via JS -->
+            </div>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- ============================================== -->
+      <!-- ADMIN DYNAMIC VIEWS -->
+      <!-- ============================================== -->
+
+      <!-- 10. ADMIN DASHBOARD -->
+      <section class="page-content" id="view-admin-dashboard">
+        <!-- Welcome Banner Card for Warden -->
+        <div class="info-card" id="admin-welcome-banner-card"
+          style="margin-bottom: 24px; padding: 20px 24px; display: flex; align-items: center; justify-content: space-between; border-left: 6px solid var(--accent-primary);">
+          <div>
+            <h2 style="font-size: 1.6rem; font-family: 'Outfit', sans-serif;" id="admin-dash-welcome-text">👋 Chief
+              Warden Control Board</h2>
+            <p style="color: var(--text-muted); font-size: 0.85rem; margin-top: 4px;" id="admin-dash-welcome-hostel"><i
+                class="fa-solid fa-hotel"></i> Grand Heritage Boys Hostel</p>
+          </div>
+
+        </div>
+
+        <!-- Admin summary stats grid -->
+        <div class="card-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
+          <div class="summary-card">
+            <div class="summary-card-info">
+              <h3>Total Students</h3>
+              <div class="count" id="admin-stat-students">256</div>
+            </div>
+            <div class="summary-card-icon color-primary">
+              <i class="fa-solid fa-graduation-cap"></i>
+            </div>
+          </div>
+          <div class="summary-card">
+            <div class="summary-card-info">
+              <h3>Occupied Rooms</h3>
+              <div class="count" id="admin-stat-occupied">96</div>
+            </div>
+            <div class="summary-card-icon color-secondary">
+              <i class="fa-solid fa-bed"></i>
+            </div>
+          </div>
+          <div class="summary-card">
+            <div class="summary-card-info">
+              <h3>Vacant Rooms</h3>
+              <div class="count" id="admin-stat-vacant">24</div>
+            </div>
+            <div class="summary-card-icon color-danger">
+              <i class="fa-solid fa-door-open"></i>
+            </div>
+          </div>
+          <div class="summary-card">
+            <div class="summary-card-info">
+              <h3>Pending Complaints</h3>
+              <div class="count" id="admin-stat-complaints">1</div>
+            </div>
+            <div class="summary-card-icon color-danger"
+              style="background: rgba(245, 158, 11, 0.1); color: var(--warning);">
+              <i class="fa-solid fa-circle-exclamation"></i>
+            </div>
+          </div>
+        </div>
+
+        <div class="dashboard-details-layout">
+          <!-- Left side widgets: mess & notices summaries -->
+          <div style="display: flex; flex-direction: column; gap: 24px;">
+            <div class="info-card">
+              <div class="section-title-wrap">
+                <h3>Today's Attendance Overview</h3>
+                <span class="badge resolved" id="admin-attendance-pct">92% Present</span>
+              </div>
+              <div style="display: flex; gap: 16px; margin-top: 16px;">
+                <div class="attendance-mini-card" style="flex: 1;">
+                  <h5>Present</h5>
+                  <div class="val" id="admin-attend-present-cnt">235</div>
+                </div>
+                <div class="attendance-mini-card" style="flex: 1; border-left-color: var(--danger);">
+                  <h5>Absent</h5>
+                  <div class="val" id="admin-attend-absent-cnt">21</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Visitor Quick logs -->
+            <div class="info-card">
+              <div class="section-title-wrap">
+                <h3>Recent Visitor Logs</h3>
+                <span class="view-all-link" data-link="admin-visitors">Log Book</span>
+              </div>
+              <div class="table-responsive" style="margin-top: 10px;">
+                <table class="custom-table" style="font-size: 0.8rem;">
+                  <thead>
+                    <tr>
+                      <th>Visitor</th>
+                      <th>Student</th>
+                      <th>Room</th>
+                      <th>Check In</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody id="admin-dash-visitors-body">
+                    <!-- Rendered via JS -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right side: Quick pending leaves approval -->
+          <div class="info-card">
+            <div class="section-title-wrap">
+              <h3>Recent Leave Requests</h3>
+              <span class="view-all-link" data-link="admin-leaves">Manage All</span>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 14px; margin-top: 16px;"
+              id="admin-dash-leaves-list">
+              <!-- Rendered via JS -->
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 10b. ADMIN APPLICATIONS PANEL -->
+      <section class="page-content" id="view-admin-applications">
+        <div class="section-title-wrap" style="margin-bottom: 24px;">
+          <h2>📋 Student Registration Applications</h2>
+          <span class="badge warning" style="font-size: 0.85rem; padding: 6px 14px;" id="apps-pending-count-badge">0
+            Pending</span>
+        </div>
+
+        <!-- Filter Tabs -->
+        <div style="display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap;">
+          <button class="submit-btn active" id="apps-tab-pending" onclick="filterAppsTab('Pending')"
+            style="padding: 8px 16px; font-size: 0.85rem;">⏳ Pending</button>
+          <button class="submit-btn btn-secondary" id="apps-tab-approved" onclick="filterAppsTab('Approved')"
+            style="padding: 8px 16px; font-size: 0.85rem;">✅ Approved</button>
+          <button class="submit-btn btn-secondary" id="apps-tab-rejected" onclick="filterAppsTab('Rejected')"
+            style="padding: 8px 16px; font-size: 0.85rem;">❌ Rejected / Transferred</button>
+          <button class="submit-btn btn-secondary" id="apps-tab-all" onclick="filterAppsTab('All')"
+            style="padding: 8px 16px; font-size: 0.85rem;">📄 All</button>
+        </div>
+
+        <div class="info-card" style="padding: 0; overflow: hidden;">
+          <div style="overflow-x: auto;">
+            <table style="width: 100%; border-collapse: collapse;">
+              <thead>
+                <tr style="background: rgba(148,163,184,0.08); border-bottom: 1px solid var(--glass-border);">
+                  <th
+                    style="padding: 14px 16px; text-align: left; font-size: 0.8rem; color: var(--text-muted); font-weight: 600; white-space: nowrap;">
+                    APP ID</th>
+                  <th
+                    style="padding: 14px 16px; text-align: left; font-size: 0.8rem; color: var(--text-muted); font-weight: 600;">
+                    Student Details</th>
+                  <th
+                    style="padding: 14px 16px; text-align: left; font-size: 0.8rem; color: var(--text-muted); font-weight: 600;">
+                    Course</th>
+                  <th
+                    style="padding: 14px 16px; text-align: left; font-size: 0.8rem; color: var(--text-muted); font-weight: 600;">
+                    Documents</th>
+                  <th
+                    style="padding: 14px 16px; text-align: left; font-size: 0.8rem; color: var(--text-muted); font-weight: 600;">
+                    Applied</th>
+                  <th
+                    style="padding: 14px 16px; text-align: left; font-size: 0.8rem; color: var(--text-muted); font-weight: 600;">
+                    Status</th>
+                  <th
+                    style="padding: 14px 16px; text-align: left; font-size: 0.8rem; color: var(--text-muted); font-weight: 600;">
+                    Actions</th>
+                </tr>
+              </thead>
+              <tbody id="admin-applications-table-body">
+                <tr>
+                  <td colspan="7" style="text-align:center; padding:32px; color:var(--text-muted);">No applications
+                    received yet.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Transfer Modal -->
+        <div id="transfer-modal"
+          style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.5); z-index:9999; align-items:center; justify-content:center;">
+          <div
+            style="background:var(--bg-secondary); border-radius:var(--border-radius); padding:32px; max-width:460px; width:90%; border:1px solid var(--glass-border);">
+            <h3 style="margin-bottom:16px;">🔄 Reject & Recommend Transfer</h3>
+            <p style="font-size:0.85rem; color:var(--text-secondary); margin-bottom:20px;">This will reject the
+              application for <strong id="transfer-app-name"></strong> and record a recommended hostel for transfer.</p>
+            <input type="hidden" id="transfer-app-id">
+            <div class="form-group" style="margin-bottom:16px;">
+              <label for="transfer-hostel-name">Recommend Transfer To (Hostel Name)</label>
+              <input type="text" class="form-control" id="transfer-hostel-name"
+                placeholder="e.g. KP-26 Girls Hostel, New Block C...">
+            </div>
+            <div class="form-group" style="margin-bottom:20px;">
+              <label for="transfer-reason">Reason for Transfer</label>
+              <textarea class="form-control" id="transfer-reason" rows="3"
+                placeholder="Reason: No vacancy, hostel type mismatch, gender hostel conflict..."></textarea>
+            </div>
+            <div style="display:flex; gap:12px; justify-content:flex-end;">
+              <button class="submit-btn btn-secondary" onclick="closeTransferModal()"
+                style="padding:10px 20px;">Cancel</button>
+              <button class="submit-btn" style="background:var(--danger); padding:10px 20px;"
+                onclick="confirmTransfer()">Confirm Reject & Transfer</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+
+      <section class="page-content" id="view-admin-menu">
+        <div class="info-card">
+          <h3>Update Daily Mess Food Menu</h3>
+          <form id="admin-menu-form" style="margin-top: 20px;">
+            <div class="form-group">
+              <label for="admin-breakfast">🌅 Breakfast Menu</label>
+              <input type="text" class="form-control" id="admin-breakfast" required>
+            </div>
+            <div class="form-group">
+              <label for="admin-lunch">🍛 Lunch Menu</label>
+              <input type="text" class="form-control" id="admin-lunch" required>
+            </div>
+            <div class="form-group">
+              <label for="admin-snack">☕ Evening Snack Menu</label>
+              <input type="text" class="form-control" id="admin-snack" required>
+            </div>
+            <div class="form-group">
+              <label for="admin-dinner">🌙 Dinner Menu</label>
+              <input type="text" class="form-control" id="admin-dinner" required>
+            </div>
+            <button type="submit" class="submit-btn">Update Mess Menu</button>
+          </form>
+        </div>
+      </section>
+
+      <!-- 12. ADMIN MANAGE NOTICES -->
+      <section class="page-content" id="view-admin-notices">
+        <div class="card-grid">
+          <div class="info-card">
+            <h3>📢 Broadcast New Notice</h3>
+            <form id="admin-notice-form" style="margin-top: 16px;">
+              <div class="form-group">
+                <label for="notice-title-in">Notice Title</label>
+                <input type="text" class="form-control" id="notice-title-in"
+                  placeholder="e.g. Water tank cleaning schedule" required>
+              </div>
+              <div class="form-group">
+                <label for="notice-type-in">Notice Type</label>
+                <select class="form-control" id="notice-type-in" required>
+                  <option value="info">Info / General</option>
+                  <option value="important">Important / Warning</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="notice-content-in">Content Details</label>
+                <textarea class="form-control" id="notice-content-in" placeholder="Write full details..."
+                  required></textarea>
+              </div>
+              <button type="submit" class="submit-btn" style="width: 100%;">Publish Notice</button>
+            </form>
+          </div>
+
+          <div class="info-card">
+            <h3>Active Notice Board</h3>
+            <div class="notice-list" id="admin-notices-list" style="margin-top: 16px;">
+              <!-- JS rendered -->
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 13. ADMIN COMPLAINTS PANEL -->
+      <section class="page-content" id="view-admin-complaints">
+        <div class="info-card">
+          <h3>Manage Student Complaints</h3>
+          <div class="table-responsive" style="margin-top: 20px;">
+            <table class="custom-table">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Student</th>
+                  <th>Issue Details</th>
+                  <th>Category</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="admin-complaints-table-body">
+                <!-- Rendered via JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+
+
+      <!-- 14. ADMIN LEAVE REQUESTS -->
+      <section class="page-content" id="view-admin-leaves">
+        <div class="info-card">
+          <h3>Leave Application Inbox</h3>
+          <div class="table-responsive" style="margin-top: 20px;">
+            <table class="custom-table">
+              <thead>
+                <tr>
+                  <th>Student</th>
+                  <th>Date Range</th>
+                  <th>Reason</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="admin-leaves-table-body">
+                <!-- Rendered via JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- 15. ADMIN STUDENT SEARCH -->
+      <section class="page-content" id="view-admin-students">
+        <div class="info-card">
+          <div class="section-title-wrap">
+            <h3>Student Database Search</h3>
+            <div style="display: flex; gap: 8px;">
+              <input type="text" class="form-control" id="admin-student-search-input"
+                placeholder="Search by name, room or enrollment..." style="width: 280px; padding: 8px 16px;">
+            </div>
+          </div>
+
+          <div class="table-responsive" style="margin-top: 20px;">
+            <table class="custom-table">
+              <thead>
+                <tr>
+                  <th>Enrollment</th>
+                  <th>Name</th>
+                  <th>Academic Info</th>
+                  <th>Room No</th>
+                  <th>Phone</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="admin-students-table-body">
+                <!-- Rendered via JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- 16. ADMIN ROOM ALLOCATION -->
+      <section class="page-content" id="view-admin-allocation">
+        <div class="card-grid" style="grid-template-columns: 1fr 1.8fr;">
+          <!-- Assign Form -->
+          <div class="info-card">
+            <h3>🛏 Allocate Room</h3>
+            <form id="admin-allocation-form" style="margin-top: 16px;">
+              <div class="form-group">
+                <label for="alloc-student-select">Select Student</label>
+                <select class="form-control" id="alloc-student-select" required>
+                  <option value="">Choose Student...</option>
+                  <!-- JS filled -->
+                </select>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="alloc-block">Block</label>
+                  <select class="form-control" id="alloc-block" required>
+                    <option value="A">Block A</option>
+                    <option value="B">Block B</option>
+                    <option value="C">Block C</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label for="alloc-room">Room No</label>
+                  <input type="text" class="form-control" id="alloc-room" placeholder="e.g. 203" required>
+                </div>
+              </div>
+
+              <button type="submit" class="submit-btn" style="width: 100%;">Allocate Room</button>
+            </form>
+          </div>
+
+          <!-- Room Visual Map -->
+          <div class="info-card">
+            <div class="section-title-wrap">
+              <h3>Hostel Rooms Layout</h3>
+              <div style="display: flex; gap: 8px; font-size: 0.8rem; font-weight: 600;">
+                <span style="color: var(--success);"><i class="fa-solid fa-circle"></i> Vacant</span>
+                <span style="color: var(--warning);"><i class="fa-solid fa-circle"></i> Partial</span>
+                <span style="color: var(--danger);"><i class="fa-solid fa-circle"></i> Full</span>
+              </div>
+            </div>
+            <div style="margin-top: 16px;" class="visual-room-allocator">
+              <!-- Filter -->
+              <div style="display: flex; gap: 8px;">
+                <button class="tab-btn active" data-alloc-filter="A">Block A</button>
+                <button class="tab-btn" data-alloc-filter="B">Block B</button>
+                <button class="tab-btn" data-alloc-filter="C">Block C</button>
+              </div>
+
+              <div class="room-grid-layout" id="room-grid-container">
+                <!-- JS filled -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 17. ADMIN VISITOR REGISTER -->
+      <section class="page-content" id="view-admin-visitors">
+        <div class="card-grid">
+          <!-- Log entry form -->
+          <div class="info-card">
+            <h3>Log Visitor Entry</h3>
+            <form id="admin-visitor-form" style="margin-top: 16px;">
+              <div class="form-group">
+                <label for="visitor-name">Visitor Name</label>
+                <input type="text" class="form-control" id="visitor-name" placeholder="Full Name" required>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="visitor-relation">Relation</label>
+                  <input type="text" class="form-control" id="visitor-relation" placeholder="e.g. Father, Friend"
+                    required>
+                </div>
+                <div class="form-group">
+                  <label for="visitor-contact">Contact Number</label>
+                  <input type="text" class="form-control" id="visitor-contact" placeholder="Mobile No" required>
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="visitor-student">Student Name</label>
+                  <input type="text" class="form-control" id="visitor-student" placeholder="Whom to visit" required>
+                </div>
+                <div class="form-group">
+                  <label for="visitor-room">Room No</label>
+                  <input type="text" class="form-control" id="visitor-room" placeholder="e.g. 203" required>
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="visitor-purpose">Purpose of Visit</label>
+                <textarea class="form-control" id="visitor-purpose" placeholder="Brief reason..." required
+                  style="min-height: 80px;"></textarea>
+              </div>
+
+              <button type="submit" class="submit-btn" style="width: 100%;">Check-In Visitor</button>
+            </form>
+          </div>
+
+          <!-- Current logs -->
+          <div class="info-card">
+            <h3>Active Visitor Book</h3>
+            <div class="table-responsive" style="margin-top: 16px;">
+              <table class="custom-table" style="font-size: 0.8rem;">
+                <thead>
+                  <tr>
+                    <th>Visitor</th>
+                    <th>Relation</th>
+                    <th>To Student</th>
+                    <th>Check In</th>
+                    <th>Check Out</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="visitor-log-tbody">
+                  <!-- JS rendered -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- ============================================== -->
+      <!-- SHARED VIEWS -->
+      <!-- ============================================== -->
+
+      <!-- 18. SETTINGS -->
+      <section class="page-content" id="view-settings">
+        <div class="card-grid">
+          <!-- Preferences Form -->
+          <div class="info-card">
+            <h3>⚙️ Preferences</h3>
+            <div style="margin-top: 20px;">
+              <div class="form-group" style="display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                  <label style="margin-bottom: 0;">Dark Mode</label>
+                  <p style="font-size: 0.75rem; color: var(--text-muted);">Switch between light and dark UI styling</p>
+                </div>
+                <input type="checkbox" id="settings-darkmode" style="width: 22px; height: 22px; cursor: pointer;">
+              </div>
+
+              <div class="form-group" style="margin-top: 20px;">
+                <label for="settings-lang">System Language</label>
+                <select class="form-control" id="settings-lang">
+                  <option value="en">English (US)</option>
+                  <option value="hi">Hindi (हिन्दी)</option>
+                  <option value="es">Spanish (Español)</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- Password Reset Form -->
+          <div class="info-card">
+            <h3>Change Password</h3>
+            <form id="settings-pwd-form" style="margin-top: 16px;">
+              <div class="form-group">
+                <label for="settings-curr-pwd">Current Password</label>
+                <input type="password" class="form-control" id="settings-curr-pwd" required>
+              </div>
+              <div class="form-group">
+                <label for="settings-new-pwd">New Password</label>
+                <input type="password" class="form-control" id="settings-new-pwd" required>
+              </div>
+              <button type="submit" class="submit-btn">Change Password</button>
+            </form>
+          </div>
+        </div>
+
+        <!-- Warden Management Section (only visible if admin) -->
+        <div id="admin-settings-hostel-section"
+          style="margin-top: 32px; display: none; border-top: 1px solid var(--glass-border); padding-top: 32px;">
+          <h2
+            style="font-size: 1.3rem; font-weight: 700; color: var(--accent-primary); margin-bottom: 20px; display: flex; align-items: center; gap: 8px;">
+            <i class="fa-solid fa-hotel"></i> Warden Hostel Control Board
+          </h2>
+
+          <div class="hostel-manage-tabs"
+            style="display: flex; gap: 8px; margin-bottom: 24px; border-bottom: 1px solid var(--glass-border); padding-bottom: 12px; overflow-x: auto;">
+            <button class="tab-btn active" data-manage-tab="general"
+              style="padding: 8px 16px; font-size: 0.85rem; font-weight:600;">🏢 General Info</button>
+            <button class="tab-btn" data-manage-tab="rules"
+              style="padding: 8px 16px; font-size: 0.85rem; font-weight:600;">📋 Hostel Rules</button>
+            <button class="tab-btn" data-manage-tab="contacts"
+              style="padding: 8px 16px; font-size: 0.85rem; font-weight:600;">📞 Emergency Contacts</button>
+            <button class="tab-btn" data-manage-tab="events"
+              style="padding: 8px 16px; font-size: 0.85rem; font-weight:600;">📅 Hostel Events</button>
+            <button class="tab-btn" data-manage-tab="feedback"
+              style="padding: 8px 16px; font-size: 0.85rem; font-weight:600;">💬 Student Feedback</button>
+          </div>
+
+
+          <!-- 1. GENERAL INFO TAB -->
+          <div id="manage-tab-general" class="manage-tab-content">
+            <div class="info-card" style="max-width: 600px; margin: 0 auto;">
+              <h3>🏢 Manage Hostel Profile</h3>
+              <p style="color: var(--text-secondary); font-size: 0.8rem; margin-top: 4px; margin-bottom: 20px;">Update
+                basic hostel metadata and Chief Warden credentials</p>
+              <form id="admin-hostel-profile-form">
+                <div class="form-group">
+                  <label for="hostel-profile-name">Hostel Name</label>
+                  <input type="text" class="form-control" id="hostel-profile-name" required>
+                </div>
+                <div class="form-group">
+                  <label for="hostel-profile-address">Hostel Address</label>
+                  <input type="text" class="form-control" id="hostel-profile-address" required>
+                </div>
+                <div class="form-row">
+                  <div class="form-group">
+                    <label for="hostel-profile-warden">Warden Name</label>
+                    <input type="text" class="form-control" id="hostel-profile-warden" required>
+                  </div>
+                  <div class="form-group">
+                    <label for="hostel-profile-title">Warden Office / Role</label>
+                    <input type="text" class="form-control" id="hostel-profile-title" required>
+                  </div>
+                </div>
+                <button type="submit" class="submit-btn" style="width: 100%; margin-top: 10px;">Save Profile
+                  Details</button>
+              </form>
+            </div>
+          </div>
+
+          <!-- 2. HOSTEL RULES TAB -->
+          <div id="manage-tab-rules" class="manage-tab-content" style="display: none;">
+            <div class="card-grid">
+              <div class="info-card">
+                <h3>📋 Current Rules & Regulations</h3>
+                <p style="color: var(--text-secondary); font-size: 0.8rem; margin-top: 4px; margin-bottom: 16px;">
+                  Institutional rules currently active in the hostel</p>
+                <div
+                  style="background: rgba(148, 163, 184, 0.05); border: 1px solid var(--glass-border); border-radius: var(--border-radius); padding: 16px; max-height: 400px; overflow-y: auto;">
+                  <ul id="admin-rules-list-container"
+                    style="display: flex; flex-direction: column; gap: 12px; list-style: none; padding: 0;">
+                    <!-- Filled dynamically via JS -->
+                  </ul>
+                </div>
+              </div>
+              <div class="info-card">
+                <h3>➕ Add New Rule</h3>
+                <p style="color: var(--text-secondary); font-size: 0.8rem; margin-top: 4px; margin-bottom: 16px;">
+                  Broadcast a new rule to the student notice board</p>
+                <form id="admin-add-rule-form">
+                  <div class="form-group">
+                    <label for="new-rule-text">Rule Description</label>
+                    <textarea class="form-control" id="new-rule-text"
+                      placeholder="e.g. Hostellers must carry their ID cards at all times." required
+                      style="min-height: 100px;"></textarea>
+                  </div>
+                  <button type="submit" class="submit-btn" style="width: 100%; margin-top: 10px;">Add Rules
+                    Code</button>
+                </form>
+              </div>
+            </div>
+          </div>
+
+          <!-- 3. EMERGENCY CONTACTS TAB -->
+          <div id="manage-tab-contacts" class="manage-tab-content" style="display: none;">
+            <div class="card-grid">
+              <div class="info-card">
+                <h3>📞 Emergency Contacts List</h3>
+                <p style="color: var(--text-secondary); font-size: 0.8rem; margin-top: 4px; margin-bottom: 16px;">
+                  Contacts displayed on the student about page</p>
+                <div
+                  style="background: rgba(148, 163, 184, 0.05); border: 1px solid var(--glass-border); border-radius: var(--border-radius); padding: 16px; max-height: 400px; overflow-y: auto;">
+                  <ul id="admin-contacts-list-container"
+                    style="display: flex; flex-direction: column; gap: 12px; list-style: none; padding: 0;">
+                    <!-- Filled dynamically via JS -->
+                  </ul>
+                </div>
+              </div>
+              <div class="info-card">
+                <h3>➕ Add Emergency Contact</h3>
+                <p style="color: var(--text-secondary); font-size: 0.8rem; margin-top: 4px; margin-bottom: 16px;">Create
+                  a new fast-access contact line</p>
+                <form id="admin-add-contact-form">
+                  <div class="form-group">
+                    <label for="new-contact-name">Contact / Department Name</label>
+                    <input type="text" class="form-control" id="new-contact-name" placeholder="e.g. Campus Security"
+                      required>
+                  </div>
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label for="new-contact-number">Phone Number</label>
+                      <input type="text" class="form-control" id="new-contact-number" placeholder="e.g. +91 98765 77777"
+                        required>
+                    </div>
+                    <div class="form-group">
+                      <label for="new-contact-role">Contact Label / Role</label>
+                      <input type="text" class="form-control" id="new-contact-role" placeholder="e.g. 24/7 Security"
+                        required>
+                    </div>
+                  </div>
+                  <button type="submit" class="submit-btn" style="width: 100%; margin-top: 10px;">Add Contact
+                    Line</button>
+                </form>
+              </div>
+            </div>
+          </div>
+
+          <!-- 4. HOSTEL EVENTS TAB -->
+          <div id="manage-tab-events" class="manage-tab-content" style="display: none;">
+            <div class="card-grid">
+              <div class="info-card">
+                <h3>📅 Hostel Events Schedule</h3>
+                <p style="color: var(--text-secondary); font-size: 0.8rem; margin-top: 4px; margin-bottom: 16px;">List
+                  of events scheduled for the hostel board</p>
+                <div
+                  style="background: rgba(148, 163, 184, 0.05); border: 1px solid var(--glass-border); border-radius: var(--border-radius); padding: 16px; max-height: 400px; overflow-y: auto;">
+                  <ul id="admin-events-list-container"
+                    style="display: flex; flex-direction: column; gap: 12px; list-style: none; padding: 0;">
+                    <!-- Filled dynamically via JS -->
+                  </ul>
+                </div>
+              </div>
+              <div class="info-card">
+                <h3>➕ Schedule New Event</h3>
+                <p style="color: var(--text-secondary); font-size: 0.8rem; margin-top: 4px; margin-bottom: 16px;">Create
+                  a new hostel social or sports event entry</p>
+                <form id="admin-add-event-form">
+                  <div class="form-group">
+                    <label for="new-event-title">Event Title</label>
+                    <input type="text" class="form-control" id="new-event-title"
+                      placeholder="e.g. Freshers Social Night" required>
+                  </div>
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label for="new-event-date">Date</label>
+                      <input type="date" class="form-control" id="new-event-date" required>
+                    </div>
+                    <div class="form-group">
+                      <label for="new-event-time">Time</label>
+                      <input type="text" class="form-control" id="new-event-time" placeholder="e.g. 07:30 PM" required>
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <label for="new-event-venue">Venue / Location</label>
+                    <input type="text" class="form-control" id="new-event-venue" placeholder="e.g. Hostel Common Hall"
+                      required>
+                  </div>
+                  <div class="form-group">
+                    <label for="new-event-desc">Event Description</label>
+                    <textarea class="form-control" id="new-event-desc"
+                      placeholder="Details about registration, schedules, etc..." required
+                      style="min-height: 60px;"></textarea>
+                  </div>
+                  <button type="submit" class="submit-btn" style="width: 100%; margin-top: 10px;">Schedule
+                    Event</button>
+                </form>
+              </div>
+
+              <!-- 5. STUDENT FEEDBACK TAB -->
+              <div id="manage-tab-feedback" class="manage-tab-content" style="display: none;">
+                <div class="info-card">
+                  <h3>💬 Student Feedback Directory</h3>
+                  <p style="color: var(--text-secondary); font-size: 0.8rem; margin-top: 4px; margin-bottom: 16px;">
+                    Suggestions and ratings submitted by residents</p>
+                  <div class="table-responsive">
+                    <table class="custom-table" style="font-size: 0.85rem;">
+                      <thead>
+                        <tr>
+                          <th>Student</th>
+                          <th>Category</th>
+                          <th>Feedback / Comment</th>
+                          <th>Date</th>
+                        </tr>
+                      </thead>
+                      <tbody id="admin-feedback-table-body">
+                        <!-- Filled dynamically via JS -->
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+      </section>
+
+      </section>
+
+      <!-- 19. ABOUT HOSTEL & EMERGENCY & FEEDBACK -->
+      <section class="page-content" id="view-about">
+        <div class="card-grid" style="grid-template-columns: 1.5fr 1fr;">
+          <!-- Left side details -->
+          <div style="display: flex; flex-direction: column; gap: 24px;">
+            <div class="info-card">
+              <h3>ℹ About Hostel</h3>
+              <div style="margin-top: 16px;">
+                <h4 style="font-size: 1.2rem; color: var(--accent-primary);" id="about-hostel-name">Grand Heritage Boys
+                  Hostel</h4>
+                <p style="font-size: 0.9rem; color: var(--text-secondary); margin-top: 8px;" id="about-hostel-address">
+                  Sector 15, Knowledge Park II, Greater Noida, UP - 201310
+                </p>
+
+                <h5 style="margin-top: 20px; font-size: 1rem;">Warden Details</h5>
+                <div style="display: flex; gap: 16px; margin-top: 10px; align-items: center;">
+                  <div class="user-avatar" style="width: 50px; height: 50px; font-size: 1.2rem;"
+                    id="about-warden-avatar">SK</div>
+                  <div>
+                    <h4 style="font-size: 0.95rem;" id="about-warden-name">Dr. Sanjay Kumar</h4>
+                    <p style="font-size: 0.8rem; color: var(--text-muted);" id="about-warden-title">Chief Warden | Room
+                      A-12 Office</p>
+                  </div>
+                </div>
+              </div>
+
+              <div style="border-top: 1px solid var(--glass-border); margin: 15px 0; padding-top: 15px;">
+                <h5 style="font-size: 1rem; color: var(--accent-primary);"><i class="fa-solid fa-hotel"></i> Hostel
+                  Specifications</h5>
+                <div
+                  style="margin-top: 10px; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; font-size: 0.85rem;">
+                  <div>
+                    <span style="color: var(--text-muted);">Total Rooms:</span>
+                    <strong id="about-spec-rooms" style="color: var(--text-primary); margin-left: 5px;">120</strong>
+                  </div>
+                  <div>
+                    <span style="color: var(--text-muted);">Room Seater:</span>
+                    <strong id="about-spec-seater" style="color: var(--text-primary); margin-left: 5px;">2
+                      Seater</strong>
+                  </div>
+                  <div>
+                    <span style="color: var(--text-muted);">Type:</span>
+                    <strong id="about-spec-ac" style="color: var(--text-primary); margin-left: 5px;">AC Rooms</strong>
+                  </div>
+                  <div>
+                    <span style="color: var(--text-muted);">Blocks Configured:</span>
+                    <strong id="about-spec-blocks" style="color: var(--text-primary); margin-left: 5px;">A, B,
+                      C</strong>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Hostel Rules list -->
+          <div class="info-card">
+            <h3>📋 Hostel Rules & Regulations</h3>
+            <ol
+              style="margin-left: 20px; margin-top: 16px; font-size: 0.85rem; line-height: 1.6; color: var(--text-secondary);"
+              id="about-rules-list">
+              <!-- Rendered dynamically -->
+            </ol>
+          </div>
+
+          <!-- Feedback & Maintenance requests -->
+          <div class="info-card">
+            <h3>💬 Student Feedback Form</h3>
+            <form id="feedback-form" style="margin-top: 16px;">
+              <div class="form-group">
+                <label for="feedback-category">Category</label>
+                <select class="form-control" id="feedback-category" required>
+                  <option value="Mess Food Quality">Mess Food Quality</option>
+                  <option value="Hostel Cleanliness">Hostel Cleanliness</option>
+                  <option value="Warden Behavior">Warden / Management</option>
+                  <option value="Internet / Wi-Fi">Internet / Wi-Fi</option>
+                  <option value="Other">Other Issues</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="feedback-comment">Comments / Suggestions</label>
+                <textarea class="form-control" id="feedback-comment" placeholder="Tell us how to improve..." required
+                  style="min-height: 80px;"></textarea>
+              </div>
+              <button type="submit" class="submit-btn">Submit Feedback</button>
+            </form>
+          </div>
+        </div>
+
+        <!-- Right side emergency numbers & Events -->
+        <div style="display: flex; flex-direction: column; gap: 24px;">
+          <div class="info-card">
+            <h3>📞 Emergency Contacts</h3>
+            <div style="margin-top: 16px;" id="about-emergency-contacts">
+              <!-- Rendered via JS -->
+            </div>
+          </div>
+
+          <div class="info-card">
+            <h3>📅 Hostel Events</h3>
+            <div style="display: flex; flex-direction: column; gap: 14px; margin-top: 16px;" id="about-events-list">
+              <!-- Rendered via JS -->
+            </div>
+          </div>
+        </div>
+  </div>
+  </section>
+
+  </main>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- MODAL DIALOGS -->
+  <!-- ============================================== -->
+
+  <!-- 1. ONLINE FINE PAYMENT MODAL -->
+  <div class="modal-overlay" id="modal-payment">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title">Pay Hostel Fine</h3>
+        <button class="modal-close" data-close="payment">&times;</button>
+      </div>
+      <div>
+        <div class="payment-card-simulator">
+          <div class="payment-card-logo">VISA</div>
+          <div class="payment-card-number">•••• •••• •••• 4092</div>
+          <div class="payment-card-footer">
+            <div>
+              <p style="font-size: 0.6rem; opacity: 0.7;">Card Holder</p>
+              <p style="font-weight: 600;">Rahul Patel</p>
+            </div>
+            <div style="text-align: right;">
+              <p style="font-size: 0.6rem; opacity: 0.7;">Expires</p>
+              <p style="font-weight: 600;">12 / 29</p>
+            </div>
+          </div>
+        </div>
+
+        <form id="payment-form">
+          <div class="form-group">
+            <label>Amount to Pay</label>
+            <div class="form-control" style="font-weight: 700; font-size: 1.1rem; background: rgba(148,163,184,0.05);"
+              id="payment-amount-label">₹200</div>
+          </div>
+          <div class="form-group">
+            <label for="pay-card-number">Card Number</label>
+            <input type="text" class="form-control" id="pay-card-number" placeholder="4000 1234 5678 4092" required
+              value="4000 1234 5678 4092">
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="pay-exp">Expiry Date</label>
+              <input type="text" class="form-control" id="pay-exp" placeholder="MM/YY" required value="12/29">
+            </div>
+            <div class="form-group">
+              <label for="pay-cvv">CVV</label>
+              <input type="password" class="form-control" id="pay-cvv" placeholder="•••" required value="123">
+            </div>
+          </div>
+
+          <button type="submit" class="submit-btn" style="width: 100%; margin-top: 10px;">Pay Fine Securely</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. QR ATTENDANCE SCANNER MODAL -->
+  <div class="modal-overlay" id="modal-qr-attendance">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title">Attendance Check-In</h3>
+        <button class="modal-close" data-close="qr-attendance">&times;</button>
+      </div>
+      <div class="qr-modal-body">
+        <p style="font-size: 0.9rem; color: var(--text-secondary);">Position the hostel check-in QR code on screen</p>
+        <div class="qr-code-placeholder" id="qr-code-box">
+          <!-- QR library target or SVG fallback -->
+        </div>
+        <p style="font-size: 0.8rem; color: var(--text-muted);" id="qr-status-msg">Waiting for scanning device
+          alignment...</p>
+
+        <div style="border-top: 1px solid var(--glass-border); padding-top: 16px; width: 100%; text-align: center;">
+          <button class="submit-btn" id="btn-simulate-qr-scan">Simulate QR Scan Success</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. WARDEN REGISTRATION APPLICATION DETAILS MODAL -->
+  <div class="modal-overlay" id="modal-app-details">
+    <div class="modal-content" style="max-width: 600px;">
+      <div class="modal-header">
+        <h3 class="modal-title">Registration Application Review</h3>
+        <button class="modal-close" data-close="app-details" id="btn-close-app-modal">&times;</button>
+      </div>
+      <div style="padding: 10px 0;">
+        <div style="display: flex; gap: 20px; align-items: flex-start; margin-bottom: 20px; flex-wrap: wrap;">
+          <div class="user-avatar" id="app-modal-photo"
+            style="width: 100px; height: 100px; font-size: 2rem; border-radius: 12px; display: flex; align-items: center; justify-content: center; overflow: hidden; background: var(--accent-primary); color: white;">
+          </div>
+          <div style="flex: 1; min-width: 250px;">
+            <h4 id="app-modal-name" style="font-size: 1.4rem; font-family: 'Outfit', sans-serif;">Vikram Malhotra</h4>
+            <p id="app-modal-enrollment" style="font-weight: 600; color: var(--accent-primary); margin-top: 2px;">
+              ENR20240930</p>
+            <p id="app-modal-course-year" style="color: var(--text-secondary); font-size: 0.9rem; margin-top: 2px;">
+              B.Tech CS | 1st Year</p>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px;">
+          <div>
+            <p style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">Email ID</p>
+            <p id="app-modal-email" style="font-weight: 500; font-size: 0.9rem; color: var(--text-primary);"></p>
+          </div>
+          <div>
+            <p style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">Phone Number</p>
+            <p id="app-modal-phone" style="font-weight: 500; font-size: 0.9rem; color: var(--text-primary);"></p>
+          </div>
+          <div>
+            <p style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">Parent Phone</p>
+            <p id="app-modal-parent" style="font-weight: 500; font-size: 0.9rem; color: var(--text-primary);"></p>
+          </div>
+          <div>
+            <p style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">Blood Group</p>
+            <p id="app-modal-blood" style="font-weight: 500; font-size: 0.9rem; color: var(--text-primary);"></p>
+          </div>
+          <div>
+            <p style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">Aadhaar Number</p>
+            <p id="app-modal-aadhaar" style="font-weight: 500; font-size: 0.9rem; color: var(--text-primary);"></p>
+          </div>
+          <div>
+            <p style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">Applied Date</p>
+            <p id="app-modal-date" style="font-weight: 500; font-size: 0.9rem; color: var(--text-primary);"></p>
+          </div>
+        </div>
+
+        <div style="margin-bottom: 20px;">
+          <p style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">Permanent Address</p>
+          <p id="app-modal-address" style="font-weight: 500; font-size: 0.9rem; color: var(--text-primary);"></p>
+        </div>
+
+        <div style="margin-bottom: 24px;">
+          <p style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px;">
+            Aadhaar Card / ID Document</p>
+          <div id="app-modal-doc-preview"
+            style="background: rgba(148, 163, 184, 0.08); border: 1px dashed var(--glass-border); padding: 16px; border-radius: var(--border-radius); text-align: center; color: var(--text-secondary); max-height: 150px; overflow-y: auto;">
+            <!-- Rendered preview or file name -->
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 12px; justify-content: flex-end;" id="app-modal-actions-wrap">
+          <button class="action-btn resolved" id="btn-app-approve"
+            style="background: var(--success); color: white; border: none; padding: 10px 20px; font-weight: 600; cursor: pointer; border-radius: var(--border-radius);">Approve
+            & Allocate Room</button>
+          <button class="action-btn unresolved" id="btn-app-reject"
+            style="background: var(--danger); color: white; border: none; padding: 10px 20px; font-weight: 600; cursor: pointer; border-radius: var(--border-radius);">Reject
+            Application</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Third Party Libraries -->
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Canvas Confetti -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <!-- QRCode.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+  <!-- Project Javascript -->
+  <script src="js/db.js"></script>
+  <script src="js/app.js"></script>
+</body>
+
+</html>
