@@ -36,7 +36,7 @@
 
         // --- Mock Routes ---
         if (path === "/api/auth/register-hostel" && method === "POST") {
-          const { wardenName, wardenTitle, adminUsername, adminPassword, hostelName, hostelAddress, totalRooms, roomSeater, acType, blocks, roomsPerBlock, accessCode } = body;
+          const { wardenName, wardenTitle, adminUsername, adminPassword, hostelName, hostelAddress, totalRooms, roomConfig, acType, blocks, accessCode } = body;
 
           const hostelObj = {
             id: 'hostel_demo',
@@ -45,11 +45,11 @@
             accessCode: accessCode.trim().toUpperCase(),
             wardenName: wardenName,
             wardenTitle: wardenTitle,
-            totalRooms: parseInt(totalRooms) || 120,
-            roomSeater: parseInt(roomSeater) || 2,
+            totalRooms: parseInt(totalRooms) || 0,
+            roomConfig: roomConfig || { "2": totalRooms },
             acType: acType || 'AC',
             blocks: blocks || 'A, B, C',
-            calculatedRooms: parseInt(totalRooms) || 120
+            calculatedRooms: parseInt(totalRooms) || 0
           };
           localStorage.setItem("hms_hostel_info", JSON.stringify(hostelObj));
 
@@ -59,23 +59,34 @@
             localStorage.setItem("hms_admins", JSON.stringify(admins));
           }
 
-          // Generate rooms
+          // Generate rooms based on roomConfig
           const blocksList = blocks ? blocks.split(',').map(b => b.trim().toUpperCase()).filter(b => b.length > 0) : ["A", "B", "C"];
           const rooms = [];
-          blocksList.forEach(block => {
-            const floorCapacity = 10;
-            const limit = roomsPerBlock ? parseInt(roomsPerBlock) : 40;
-            for (let r = 1; r <= limit; r++) {
-              const floor = Math.floor((r - 1) / floorCapacity) + 1;
-              const roomNoVal = `${floor * 100 + ((r - 1) % floorCapacity) + 1}`;
-              rooms.push({
-                roomNo: roomNoVal,
-                block: block,
-                floor: `${floor}${floor === 1 ? 'st' : floor === 2 ? 'nd' : floor === 3 ? 'rd' : 'th'} Floor`,
-                capacity: parseInt(roomSeater) || 2,
-                occupied: 0,
-                status: "Vacant",
-                type: acType || 'AC'
+          const config = roomConfig || { "2": totalRooms };
+          const floorCapacity = 10;
+          
+          Object.keys(config).forEach(seaterType => {
+            const count = parseInt(config[seaterType]) || 0;
+            if (count > 0) {
+              const roomsPerBlock = Math.ceil(count / blocksList.length);
+              blocksList.forEach(block => {
+                const limit = roomsPerBlock;
+                for (let r = 1; r <= limit; r++) {
+                  // Only push up to the total count needed for this seater type globally
+                  if (rooms.filter(rm => rm.capacity === parseInt(seaterType)).length >= count) break;
+                  
+                  const floor = Math.floor((r - 1) / floorCapacity) + 1;
+                  const roomNoVal = `${parseInt(seaterType)}${floor * 100 + ((r - 1) % floorCapacity) + 1}`; // Prefix with seater type to avoid conflicts
+                  rooms.push({
+                    roomNo: roomNoVal,
+                    block: block,
+                    floor: `${floor}${floor === 1 ? 'st' : floor === 2 ? 'nd' : floor === 3 ? 'rd' : 'th'} Floor`,
+                    capacity: parseInt(seaterType),
+                    occupied: 0,
+                    status: "Vacant",
+                    type: acType || 'AC'
+                  });
+                }
               });
             }
           });
@@ -319,23 +330,16 @@ function initApp() {
   syncTheme();
   setupLoginHandlers();
 
-  // Dynamic brand name and background updates
-  const hostelInfo = DB.get("hostel_info");
+  // Static Brand Name
   const sidebarBrand = document.getElementById("sidebar-brand-name");
   const loginTitle = document.getElementById("login-title-text");
-  const loginContainer = document.getElementById("login-container");
 
-  if (sidebarBrand && hostelInfo && hostelInfo.name) {
-    sidebarBrand.textContent = hostelInfo.name;
-    document.title = `${hostelInfo.name} - HMS`;
-  } else if (sidebarBrand) {
+  if (sidebarBrand) {
     sidebarBrand.textContent = "Hostel Management System";
     document.title = "Hostel Management System";
   }
 
-  if (loginTitle && hostelInfo && hostelInfo.name) {
-    loginTitle.textContent = `${hostelInfo.name} Portal`;
-  } else if (loginTitle) {
+  if (loginTitle) {
     loginTitle.textContent = "Hostel Management System";
   }
 
@@ -463,8 +467,8 @@ function setupLoginHandlers() {
       adminRegisterForm.style.display = "none";
       document.getElementById("login-role-selector").style.display = "flex";
       loginForm.style.display = "block";
-      document.getElementById("login-title-text").textContent = "HMS Portal";
-      document.getElementById("login-subtitle-text").textContent = "Hostel Management System Login";
+      document.getElementById("login-title-text").textContent = "Hostel Management System";
+      document.getElementById("login-subtitle-text").textContent = "Login";
       helpText.style.display = "block";
 
       const regText = currentLoginRole === "student" ? "Register Now" : "Register Warden/Hostel";
@@ -476,10 +480,10 @@ function setupLoginHandlers() {
       adminRegisterForm.style.display = "none";
       document.getElementById("login-role-selector").style.display = "none";
       helpText.style.display = "none";
-      
+
       const forgotForm = document.getElementById("forgot-password-form");
       if (forgotForm) forgotForm.style.display = "block";
-      
+
       document.getElementById("login-title-text").textContent = "Forgot Password";
       document.getElementById("login-subtitle-text").textContent = "Recover your account access";
       toggleWrap.innerHTML = "";
@@ -487,13 +491,13 @@ function setupLoginHandlers() {
       // Switch back to Login view
       const forgotForm = document.getElementById("forgot-password-form");
       if (forgotForm) forgotForm.style.display = "none";
-      
+
       loginForm.style.display = "block";
       document.getElementById("login-role-selector").style.display = "flex";
-      document.getElementById("login-title-text").textContent = "HMS Portal";
-      document.getElementById("login-subtitle-text").textContent = "Hostel Management System Login";
+      document.getElementById("login-title-text").textContent = "Hostel Management System";
+      document.getElementById("login-subtitle-text").textContent = "Login";
       helpText.style.display = "block";
-      
+
       const regText = currentLoginRole === "student" ? "Register Now" : "Register Warden/Hostel";
       toggleWrap.innerHTML = `<p style="font-size: 0.85rem; color: var(--text-secondary);">Don't have an account? <span id="btn-show-register" style="color: var(--accent-primary); font-weight: 600; cursor: pointer; text-decoration: underline;">${regText}</span></p>`;
     }
@@ -578,7 +582,7 @@ function setupLoginHandlers() {
   // Handle Forgot Password form submit
   const forgotForm = document.getElementById("forgot-password-form");
   const forgotRole = document.getElementById("forgot-role");
-  
+
   if (forgotRole) {
     forgotRole.addEventListener("change", (e) => {
       const isStudent = e.target.value === "student";
@@ -608,22 +612,22 @@ function setupLoginHandlers() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload)
       })
-      .then(async res => {
-        const text = await res.text();
-        let data = {};
-        try {
-          data = text ? JSON.parse(text) : {};
-        } catch (err) {}
-        if (!res.ok) throw new Error(data.error || "Password reset failed");
-        return data;
-      })
-      .then(data => {
-        alert("✅ " + data.message);
-        document.getElementById("btn-back-to-login").click();
-      })
-      .catch(err => {
-        alert("❌ Error: " + err.message);
-      });
+        .then(async res => {
+          const text = await res.text();
+          let data = {};
+          try {
+            data = text ? JSON.parse(text) : {};
+          } catch (err) { }
+          if (!res.ok) throw new Error(data.error || "Password reset failed");
+          return data;
+        })
+        .then(data => {
+          alert("✅ " + data.message);
+          document.getElementById("btn-back-to-login").click();
+        })
+        .catch(err => {
+          alert("❌ Error: " + err.message);
+        });
     };
   }
 
@@ -754,13 +758,16 @@ function setupLoginHandlers() {
         return;
       }
 
-      const totalRoomsVal = parseInt(document.getElementById("admin-reg-total-rooms").value);
-      const seaterVal = parseInt(document.getElementById("admin-reg-seater").value);
+      const rooms1 = parseInt(document.getElementById("admin-reg-rooms-1").value) || 0;
+      const rooms2 = parseInt(document.getElementById("admin-reg-rooms-2").value) || 0;
+      const rooms3 = parseInt(document.getElementById("admin-reg-rooms-3").value) || 0;
+      const rooms4 = parseInt(document.getElementById("admin-reg-rooms-4").value) || 0;
+      const totalRoomsVal = rooms1 + rooms2 + rooms3 + rooms4;
+      
       const acVal = document.getElementById("admin-reg-ac").value;
       const blocksInput = document.getElementById("admin-reg-blocks").value.trim();
-      const roomsPerBlockRaw = document.getElementById("admin-reg-rooms-per-block").value;
-      const roomsPerBlockVal = roomsPerBlockRaw ? parseInt(roomsPerBlockRaw) : totalRoomsVal;
-
+      
+      // Removed roomsPerBlock for simplicity as total is dynamically distributed now
       const registerPayload = {
         wardenName,
         wardenTitle,
@@ -768,11 +775,15 @@ function setupLoginHandlers() {
         adminPassword,
         hostelName,
         hostelAddress,
+        roomConfig: {
+          "1": rooms1,
+          "2": rooms2,
+          "3": rooms3,
+          "4": rooms4
+        },
         totalRooms: totalRoomsVal,
-        roomSeater: seaterVal,
         acType: acVal,
         blocks: blocksInput,
-        roomsPerBlock: roomsPerBlockVal,
         accessCode
       };
 
@@ -1210,7 +1221,7 @@ function renderViewData(viewId) {
 
 function renderStudentDashboard() {
   const students = DB.get("students") || [];
-  const currentStudent = students.find(s => s.enrollment === currentStudentEnrollment) || { name: "Rahul Patel", roomNo: "203", block: "B" };
+  const currentStudent = students.find(s => s.enrollment === currentStudentEnrollment) || { name: "New Student", roomNo: "N/A", block: "N/A" };
 
   // Update Welcome Banner Content
   const welcomeText = document.getElementById("dash-welcome-text");
@@ -1219,7 +1230,7 @@ function renderStudentDashboard() {
   if (welcomeText) welcomeText.textContent = `👋 Welcome, ${currentStudent.name}`;
   if (welcomeRoom) welcomeRoom.textContent = `Room No: ${currentStudent.roomNo} | Block ${currentStudent.block}`;
 
-  const hostelInfo = DB.get("hostel_info") || { name: "Grand Heritage Boys Hostel" };
+  const hostelInfo = DB.get("hostel_info") || { name: "Hostel Management System" };
   if (welcomeHostel) welcomeHostel.innerHTML = `<i class="fa-solid fa-hotel"></i> ${hostelInfo.name}`;
 
   // Removed dashboard background image logic
@@ -1391,16 +1402,16 @@ function renderRoomDetails() {
 function renderFoodMenu(selectedDayOverride) {
   const fullMenu = DB.get("food_menu") || {};
   let currentDay = new Date().toLocaleDateString('en-US', { weekday: 'long' });
-  
+
   const studentDaySelector = document.getElementById("student-menu-day");
   if (studentDaySelector && !selectedDayOverride) {
-      if (!studentDaySelector.dataset.initialized) {
-          studentDaySelector.value = currentDay;
-          studentDaySelector.dataset.initialized = "true";
-      }
-      currentDay = studentDaySelector.value;
+    if (!studentDaySelector.dataset.initialized) {
+      studentDaySelector.value = currentDay;
+      studentDaySelector.dataset.initialized = "true";
+    }
+    currentDay = studentDaySelector.value;
   } else if (selectedDayOverride) {
-      currentDay = selectedDayOverride;
+    currentDay = selectedDayOverride;
   }
 
   const menu = fullMenu[currentDay] || {};
@@ -1616,7 +1627,7 @@ function renderAdminDashboard() {
 
   // Update Welcome Banner dynamic hostel subtitle
   const adminWelcomeHostel = document.getElementById("admin-dash-welcome-hostel");
-  const hostelInfo = DB.get("hostel_info") || { name: "Grand Heritage Boys Hostel" };
+  const hostelInfo = DB.get("hostel_info") || { name: "Hostel Management System" };
   if (adminWelcomeHostel) adminWelcomeHostel.innerHTML = `<i class="fa-solid fa-hotel"></i> ${hostelInfo.name}`;
 
   // Removed dashboard background image logic
@@ -1735,7 +1746,7 @@ window.updateLeaveStatus = function (leaveId, status) {
   if (idx !== -1) {
     leaves[idx].status = status;
     DB.set("leave_applications", leaves);
-    
+
     // Notify Student
     const leaveApp = leaves[idx];
     addNotification(leaveApp.enrollment, `Leave Application ${status}`, `Your leave request from ${formatDate(leaveApp.fromDate)} to ${formatDate(leaveApp.toDate)} has been ${status.toLowerCase()}`, "leaves", "leave");
@@ -1752,7 +1763,7 @@ function loadAdminMenuForm() {
   const fullMenu = DB.get("food_menu") || {};
   const tbody = document.getElementById("admin-menu-tbody");
   if (!tbody) return;
-  
+
   const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
   let html = "";
   days.forEach(day => {
@@ -1847,7 +1858,7 @@ window.resolveComplaintPrompt = function (complaintId) {
       complaints[idx].status = "Resolved";
       complaints[idx].adminComment = comment || "Resolved by Warden Office.";
       DB.set("complaints", complaints);
-      
+
       // Notify Student
       const cmp = complaints[idx];
       addNotification(cmp.enrollment, "Complaint Resolved", `Your complaint "${cmp.title}" has been resolved. Comment: "${complaints[idx].adminComment}"`, "complaints", "complaint");
@@ -2359,7 +2370,7 @@ function setupFormSubmissions() {
       });
 
       DB.set("complaints", complaints);
-      
+
       // Notify Admin
       const students = DB.get("students") || [];
       const currentStudent = students.find(s => s.enrollment === currentStudentEnrollment) || { name: "A Resident Student" };
@@ -2396,7 +2407,7 @@ function setupFormSubmissions() {
       });
 
       DB.set("leave_applications", leaves);
-      
+
       // Notify Admin
       const students = DB.get("students") || [];
       const currentStudent = students.find(s => s.enrollment === currentStudentEnrollment) || { name: "A Resident Student" };
@@ -2414,7 +2425,7 @@ function setupFormSubmissions() {
   if (adminMenuForm) {
     adminMenuForm.addEventListener("submit", (e) => {
       e.preventDefault();
-      
+
       const fullMenu = DB.get("food_menu") || {};
       const rows = document.querySelectorAll("#admin-menu-tbody tr");
       rows.forEach(row => {
@@ -2591,7 +2602,7 @@ function setupFormSubmissions() {
       });
 
       DB.set("feedback", feedback);
-      
+
       // Notify Admin
       const students = DB.get("students") || [];
       const currentStudent = students.find(s => s.enrollment === currentStudentEnrollment) || { name: "A Resident Student" };
@@ -3390,7 +3401,7 @@ function clearAllNotifications() {
   renderNotifications();
 }
 
-window.handleNotificationClick = function(id) {
+window.handleNotificationClick = function (id) {
   const notifications = DB.get("notifications") || [];
   const notif = notifications.find(n => n.id === id);
   if (!notif) return;
@@ -3446,7 +3457,7 @@ function escapeHtml(text) {
     '"': '&quot;',
     "'": '&#039;'
   };
-  return text.replace(/[&<>"']/g, function(m) { return map[m]; });
+  return text.replace(/[&<>"']/g, function (m) { return map[m]; });
 }
 
 // ==========================================

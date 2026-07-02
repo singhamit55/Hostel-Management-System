@@ -25,7 +25,7 @@
       <div style="text-align: center; margin-bottom: 24px;">
         <span style="font-size: 3rem; display: block; margin-bottom: 8px;">🏠</span>
         <h2 style="font-size: 1.8rem; font-family: 'Outfit', sans-serif; color: var(--text-primary);"
-          id="login-title-text">HMS Portal</h2>
+          id="login-title-text">Hostel Management System</h2>
         <p style="color: var(--text-secondary); font-size: 0.85rem; margin-top: 4px;" id="login-subtitle-text">Hostel
           Management System Login</p>
       </div>
@@ -259,18 +259,23 @@
 
           <div class="form-row">
             <div class="form-group">
-              <label for="admin-reg-total-rooms">Number of Rooms Total</label>
-              <input type="number" class="form-control" id="admin-reg-total-rooms" placeholder="e.g. 120" min="1"
-                required>
+              <label for="admin-reg-rooms-1">Number of 1-Seater Rooms</label>
+              <input type="number" class="form-control" id="admin-reg-rooms-1" placeholder="e.g. 10" min="0" value="0" required>
             </div>
             <div class="form-group">
-              <label for="admin-reg-seater">Room Seater / Capacity</label>
-              <select class="form-control" id="admin-reg-seater" required>
-                <option value="1">1 Seater (Single Room)</option>
-                <option value="2" selected>2 Seater (Double Sharing)</option>
-                <option value="3">3 Seater (Triple Sharing)</option>
-                <option value="4">4 Seater (Quad Sharing)</option>
-              </select>
+              <label for="admin-reg-rooms-2">Number of 2-Seater Rooms</label>
+              <input type="number" class="form-control" id="admin-reg-rooms-2" placeholder="e.g. 50" min="0" value="0" required>
+            </div>
+          </div>
+          
+          <div class="form-row">
+            <div class="form-group">
+              <label for="admin-reg-rooms-3">Number of 3-Seater Rooms</label>
+              <input type="number" class="form-control" id="admin-reg-rooms-3" placeholder="e.g. 20" min="0" value="0" required>
+            </div>
+            <div class="form-group">
+              <label for="admin-reg-rooms-4">Number of 4-Seater Rooms</label>
+              <input type="number" class="form-control" id="admin-reg-rooms-4" placeholder="e.g. 10" min="0" value="0" required>
             </div>
           </div>
 
@@ -288,10 +293,7 @@
             </div>
           </div>
 
-          <div class="form-group">
-            <label for="admin-reg-rooms-per-block">Rooms per Block</label>
-            <input type="number" class="form-control" id="admin-reg-rooms-per-block" placeholder="e.g. 40" min="1">
-          </div>
+
         </div>
 
         <button type="submit" class="submit-btn" style="width: 100%; margin-top: 10px;">Register Admin & Configure
@@ -483,12 +485,11 @@
         <div class="info-card" id="student-welcome-banner-card"
           style="margin-bottom: 24px; padding: 20px 24px; display: flex; align-items: center; justify-content: space-between; border-left: 6px solid var(--accent-primary);">
           <div>
-            <h2 style="font-size: 1.6rem; font-family: 'Outfit', sans-serif;" id="dash-welcome-text">👋 Welcome, Rahul
-              Patel</h2>
-            <p style="font-size: 0.95rem; margin-top: 4px;" id="dash-welcome-room">Room
-              No: 203 | Block B</p>
+            <h2 style="font-size: 1.6rem; font-family: 'Outfit', sans-serif;" id="dash-welcome-text">👋 Welcome, New
+              Student</h2>
+            <p style="font-size: 0.95rem; margin-top: 4px;" id="dash-welcome-room">Room No: N/A | Block N/A</p>
             <p style="font-size: 0.8rem; margin-top: 4px;" id="dash-welcome-hostel"><i class="fa-solid fa-hotel"></i>
-              Grand Heritage Boys Hostel</p>
+              Hostel Management System</p>
           </div>
 
         </div>
@@ -914,7 +915,7 @@
             <h2 style="font-size: 1.6rem; font-family: 'Outfit', sans-serif;" id="admin-dash-welcome-text">👋 Chief
               Warden Control Board</h2>
             <p style="color: var(--text-muted); font-size: 0.85rem; margin-top: 4px;" id="admin-dash-welcome-hostel"><i
-                class="fa-solid fa-hotel"></i> Grand Heritage Boys Hostel</p>
+                class="fa-solid fa-hotel"></i> Hostel Management System</p>
           </div>
 
         </div>

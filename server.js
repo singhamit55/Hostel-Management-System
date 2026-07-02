@@ -63,8 +63,8 @@ app.post('/api/auth/register-hostel', async (req, res) => {
   try {
     const {
       wardenName, wardenTitle, adminUsername, adminPassword,
-      hostelName, hostelAddress, totalRooms, roomSeater,
-      acType, blocks, roomsPerBlock, accessCode
+      hostelName, hostelAddress, totalRooms, roomConfig,
+      acType, blocks, accessCode
     } = req.body;
 
     if (!adminUsername || !adminPassword || !hostelName || !accessCode) {
@@ -85,9 +85,10 @@ app.post('/api/auth/register-hostel', async (req, res) => {
     const totalRoomsVal = parseInt(totalRooms) || 120;
     const seaterVal = parseInt(roomSeater) || 2;
     const blocksList = blocks ? blocks.split(',').map(b => b.trim().toUpperCase()).filter(b => b.length > 0) : ["Main"];
-    const roomsPerBlockVal = roomsPerBlock ? parseInt(roomsPerBlock) : totalRoomsVal;
-    const calculatedRoomsCount = blocksList.length * roomsPerBlockVal;
-
+    
+    // Fallback if no roomConfig provided
+    const config = roomConfig || { "2": totalRoomsVal };
+    
     const hostelObj = {
       id: hostelId,
       name: hostelName,
@@ -96,26 +97,37 @@ app.post('/api/auth/register-hostel', async (req, res) => {
       wardenName: wardenName,
       wardenTitle: wardenTitle,
       totalRooms: totalRoomsVal,
-      calculatedRooms: calculatedRoomsCount,
-      roomSeater: seaterVal,
+      calculatedRooms: totalRoomsVal, // Calculated is now just totalRooms
+      roomConfig: config,
       acType: acType,
       blocks: blocksList.join(', ')
     };
 
     const newRooms = [];
-    blocksList.forEach(block => {
-      const floorCapacity = 10;
-      for (let r = 1; r <= roomsPerBlockVal; r++) {
-        const floor = Math.floor((r - 1) / floorCapacity) + 1;
-        const roomNoVal = `${floor * 100 + ((r - 1) % floorCapacity) + 1}`;
-        newRooms.push({
-          roomNo: roomNoVal,
-          block: block,
-          floor: `${floor}${floor === 1 ? 'st' : floor === 2 ? 'nd' : floor === 3 ? 'rd' : 'th'} Floor`,
-          capacity: seaterVal,
-          type: acType,
-          occupied: 0,
-          status: "Vacant"
+    const floorCapacity = 10;
+    
+    Object.keys(config).forEach(seaterType => {
+      const count = parseInt(config[seaterType]) || 0;
+      if (count > 0) {
+        const roomsPerBlock = Math.ceil(count / blocksList.length);
+        blocksList.forEach(block => {
+          const limit = roomsPerBlock;
+          for (let r = 1; r <= limit; r++) {
+            // Stop generating if we hit the global count for this seater type
+            if (newRooms.filter(rm => rm.capacity === parseInt(seaterType)).length >= count) break;
+            
+            const floor = Math.floor((r - 1) / floorCapacity) + 1;
+            const roomNoVal = `${parseInt(seaterType)}${floor * 100 + ((r - 1) % floorCapacity) + 1}`;
+            newRooms.push({
+              roomNo: roomNoVal,
+              block: block,
+              floor: `${floor}${floor === 1 ? 'st' : floor === 2 ? 'nd' : floor === 3 ? 'rd' : 'th'} Floor`,
+              capacity: parseInt(seaterType),
+              type: acType,
+              occupied: 0,
+              status: "Vacant"
+            });
+          }
         });
       }
     });

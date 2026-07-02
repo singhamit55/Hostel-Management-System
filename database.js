@@ -12,7 +12,7 @@ const HostelSchema = new mongoose.Schema({
   wardenTitle: String,
   totalRooms: Number,
   calculatedRooms: Number,
-  roomSeater: Number,
+  roomConfig: Object,
   acType: String,
   blocks: String
 });
