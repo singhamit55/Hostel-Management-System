@@ -83,12 +83,11 @@ app.post('/api/auth/register-hostel', async (req, res) => {
 
     const hostelId = 'hostel_' + Date.now();
     const totalRoomsVal = parseInt(totalRooms) || 120;
-    const seaterVal = parseInt(roomSeater) || 2;
     const blocksList = blocks ? blocks.split(',').map(b => b.trim().toUpperCase()).filter(b => b.length > 0) : ["Main"];
-    
+
     // Fallback if no roomConfig provided
     const config = roomConfig || { "2": totalRoomsVal };
-    
+
     const hostelObj = {
       id: hostelId,
       name: hostelName,
@@ -105,7 +104,7 @@ app.post('/api/auth/register-hostel', async (req, res) => {
 
     const newRooms = [];
     const floorCapacity = 10;
-    
+
     Object.keys(config).forEach(seaterType => {
       const count = parseInt(config[seaterType]) || 0;
       if (count > 0) {
@@ -115,7 +114,7 @@ app.post('/api/auth/register-hostel', async (req, res) => {
           for (let r = 1; r <= limit; r++) {
             // Stop generating if we hit the global count for this seater type
             if (newRooms.filter(rm => rm.capacity === parseInt(seaterType)).length >= count) break;
-            
+
             const floor = Math.floor((r - 1) / floorCapacity) + 1;
             const roomNoVal = `${parseInt(seaterType)}${floor * 100 + ((r - 1) % floorCapacity) + 1}`;
             newRooms.push({
