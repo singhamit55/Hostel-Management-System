@@ -1,1 +1,1 @@
-live link :--https://hostel-management-system-n115.onrender.com
+live link :--https://hostel-management-system-575t.onrender.com
