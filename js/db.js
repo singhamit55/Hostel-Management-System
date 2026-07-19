@@ -36,7 +36,7 @@
 
         // --- Mock Routes ---
         if (path === "/api/auth/register-hostel" && method === "POST") {
-          const { wardenName, wardenTitle, adminUsername, adminPassword, hostelName, hostelAddress, totalRooms, roomSeater, acType, blocks, roomsPerBlock, accessCode, bgImage, dashImage } = body;
+          const { wardenName, wardenTitle, adminUsername, adminPassword, hostelName, hostelAddress, totalRooms, roomCounts, acType, blocks, accessCode, bgImage, dashImage } = body;
 
           const hostelObj = {
             id: 'hostel_demo',
@@ -46,7 +46,6 @@
             wardenName: wardenName,
             wardenTitle: wardenTitle,
             totalRooms: parseInt(totalRooms) || 120,
-            roomSeater: parseInt(roomSeater) || 2,
             acType: acType || 'AC',
             blocks: blocks || 'A, B, C',
             calculatedRooms: parseInt(totalRooms) || 120,
@@ -64,23 +63,28 @@
           // Generate rooms
           const blocksList = blocks ? blocks.split(',').map(b => b.trim().toUpperCase()).filter(b => b.length > 0) : ["A", "B", "C"];
           const rooms = [];
-          blocksList.forEach(block => {
-            const floorCapacity = 10;
-            const limit = roomsPerBlock ? parseInt(roomsPerBlock) : 40;
-            for (let r = 1; r <= limit; r++) {
-              const floor = Math.floor((r - 1) / floorCapacity) + 1;
-              const roomNoVal = `${floor * 100 + ((r - 1) % floorCapacity) + 1}`;
+          const counts = roomCounts || { 2: totalRooms || 120 };
+          
+          let roomIndex = 0;
+          for (const [capStr, count] of Object.entries(counts)) {
+            const capacity = parseInt(capStr);
+            for (let i = 0; i < count; i++) {
+              const block = blocksList[roomIndex % blocksList.length];
+              const blockRoomIndex = Math.floor(roomIndex / blocksList.length);
+              const floor = Math.floor(blockRoomIndex / 10) + 1;
+              const roomNoVal = `${floor * 100 + (blockRoomIndex % 10) + 1}`;
               rooms.push({
                 roomNo: roomNoVal,
                 block: block,
                 floor: `${floor}${floor === 1 ? 'st' : floor === 2 ? 'nd' : floor === 3 ? 'rd' : 'th'} Floor`,
-                capacity: parseInt(roomSeater) || 2,
+                capacity: capacity,
                 occupied: 0,
                 status: "Vacant",
                 type: acType || 'AC'
               });
+              roomIndex++;
             }
-          });
+          }
           localStorage.setItem("hms_rooms", JSON.stringify(rooms));
 
           // Seed default collections

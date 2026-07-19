@@ -6,69 +6,36 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap');
 
 :root {
-  /* Light Theme Color System */
-  --bg-primary: #f8fafc;
+  /* Soft Sage & Ivory Premium Theme */
+  --bg-primary: #f1f5f5;
   --bg-secondary: #ffffff;
-  --bg-gradient: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
-  --glass-bg: rgba(255, 255, 255, 0.7);
-  --glass-border: rgba(255, 255, 255, 0.5);
-  --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.04);
+  --bg-gradient: linear-gradient(135deg, #f1f5f5 0%, #e3e9e5 100%);
+  
+  --glass-bg: rgba(255, 255, 255, 0.85);
+  --glass-border: rgba(255, 255, 255, 0.6);
+  --glass-shadow: 0 8px 32px 0 rgba(43, 58, 53, 0.08);
 
-  --text-primary: #0f172a;
-  --text-secondary: #475569;
-  --text-muted: #94a3b8;
+  --text-primary: #2b3a35;
+  --text-secondary: #546961;
+  --text-muted: #91a59d;
 
-  --accent-primary: #2563eb;
-  /* Royal Blue */
-  --accent-primary-hover: #1d4ed8;
-  --accent-secondary: #041514;
-  /* Teal */
+  --accent-primary: #3e7a68;
+  --accent-primary-hover: #2f5c4e;
+  --accent-secondary: #b88267;
 
-  --success: #03251a;
-  --success-bg: rgba(16, 185, 129, 0.1);
-  --warning: #f59e0b;
-  --warning-bg: rgba(245, 158, 11, 0.1);
-  --danger: #ef4444;
-  --danger-bg: rgba(239, 68, 68, 0.1);
+  --success: #2f5c4e;
+  --success-bg: rgba(62, 122, 104, 0.15);
+  --warning: #d97706;
+  --warning-bg: rgba(217, 119, 6, 0.1);
+  --danger: #dc2626;
+  --danger-bg: rgba(220, 38, 38, 0.1);
 
   --sidebar-width: 260px;
   --header-height: 70px;
   --border-radius: 16px;
   --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  --hover-bg: rgba(148, 163, 184, 0.12);
-  --table-hover-bg: rgba(148, 163, 184, 0.04);
-}
-
-[data-theme="dark"] {
-  /* Dark Theme Color System */
-  --bg-primary: #0b0f19;
-  --bg-secondary: #111827;
-  --bg-gradient: linear-gradient(135deg, #0b0f19 0%, #111827 100%);
-  --glass-bg: rgba(17, 24, 39, 0.7);
-  --glass-border: rgba(255, 255, 255, 0.08);
-  --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-
-  --text-primary: #f3f4f6;
-  --text-secondary: #9ca3af;
-  --text-muted: #6b7280;
-
-  --accent-primary: #3b82f6;
-  /* Radiant Blue */
-  --accent-primary-hover: #60a5fa;
-  --accent-secondary: #052420;
-  /* Teal */
-
-  --success: #34d399;
-  --success-bg: rgba(52, 211, 153, 0.1);
-  --warning: #fbbf24;
-  --warning-bg: rgba(251, 191, 36, 0.1);
-  --danger: #f87171;
-  --danger-bg: rgba(248, 113, 113, 0.1);
-
-  --hover-bg: rgba(37, 99, 235, 0.2);
-  /* Semi-transparent blue on dark background */
-  --table-hover-bg: rgba(37, 99, 235, 0.08);
-  /* Transparent blue for rows */
+  --hover-bg: rgba(62, 122, 104, 0.08);
+  --table-hover-bg: rgba(62, 122, 104, 0.04);
 }
 
 /* Background Blobs for Glassmorphism Context */
@@ -540,11 +507,6 @@ a {
 .color-secondary {
   background: rgba(13, 148, 136, 0.1);
   color: var(--accent-secondary);
-}
-
-[data-theme="dark"] .color-secondary {
-  background: rgba(59, 130, 246, 0.15);
-  color: var(--accent-primary);
 }
 
 .color-danger {
@@ -1263,8 +1225,6 @@ textarea.form-control {
 
 #login-container {
   display: flex;
-  align-items: center;
-  justify-content: center;
   width: 100vw;
   height: 100vh;
   position: fixed;
@@ -1274,9 +1234,11 @@ textarea.form-control {
   background: var(--bg-primary);
   background-image: var(--bg-gradient);
   padding: 16px;
+  overflow-y: auto;
 }
 
 .login-card {
+  margin: auto;
   background: var(--glass-bg);
   backdrop-filter: blur(16px);
   border: 1px solid var(--glass-border);

@@ -9,8 +9,8 @@
   window.fetch = async function (input, init) {
     if (typeof input === "string" && input.startsWith("/api/")) {
       const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-      const isBackendOrigin = window.location.port === "3000" || !isLocalhost;
-      const apiBase = isBackendOrigin ? "" : "http://localhost:3000";
+      const isBackendOrigin = window.location.port === "3001" || !isLocalhost;
+      const apiBase = isBackendOrigin ? "" : "http://localhost:3001";
       const targetUrl = apiBase + input;
 
       try {
@@ -36,7 +36,7 @@
 
         // --- Mock Routes ---
         if (path === "/api/auth/register-hostel" && method === "POST") {
-          const { wardenName, wardenTitle, adminUsername, adminPassword, hostelName, hostelAddress, totalRooms, roomConfig, acType, blocks, accessCode } = body;
+          const { wardenName, wardenTitle, adminUsername, adminPassword, hostelName, hostelAddress, totalRooms, roomCounts, acType, blocks, accessCode } = body;
 
           const hostelObj = {
             id: 'hostel_demo',
@@ -45,11 +45,10 @@
             accessCode: accessCode.trim().toUpperCase(),
             wardenName: wardenName,
             wardenTitle: wardenTitle,
-            totalRooms: parseInt(totalRooms) || 0,
-            roomConfig: roomConfig || { "2": totalRooms },
+            totalRooms: parseInt(totalRooms) || 120,
             acType: acType || 'AC',
             blocks: blocks || 'A, B, C',
-            calculatedRooms: parseInt(totalRooms) || 0
+            calculatedRooms: parseInt(totalRooms) || 120
           };
           localStorage.setItem("hms_hostel_info", JSON.stringify(hostelObj));
 
@@ -59,37 +58,31 @@
             localStorage.setItem("hms_admins", JSON.stringify(admins));
           }
 
-          // Generate rooms based on roomConfig
+          // Generate rooms
           const blocksList = blocks ? blocks.split(',').map(b => b.trim().toUpperCase()).filter(b => b.length > 0) : ["A", "B", "C"];
           const rooms = [];
-          const config = roomConfig || { "2": totalRooms };
-          const floorCapacity = 10;
+          const counts = roomCounts || { 2: totalRooms || 120 };
           
-          Object.keys(config).forEach(seaterType => {
-            const count = parseInt(config[seaterType]) || 0;
-            if (count > 0) {
-              const roomsPerBlock = Math.ceil(count / blocksList.length);
-              blocksList.forEach(block => {
-                const limit = roomsPerBlock;
-                for (let r = 1; r <= limit; r++) {
-                  // Only push up to the total count needed for this seater type globally
-                  if (rooms.filter(rm => rm.capacity === parseInt(seaterType)).length >= count) break;
-                  
-                  const floor = Math.floor((r - 1) / floorCapacity) + 1;
-                  const roomNoVal = `${parseInt(seaterType)}${floor * 100 + ((r - 1) % floorCapacity) + 1}`; // Prefix with seater type to avoid conflicts
-                  rooms.push({
-                    roomNo: roomNoVal,
-                    block: block,
-                    floor: `${floor}${floor === 1 ? 'st' : floor === 2 ? 'nd' : floor === 3 ? 'rd' : 'th'} Floor`,
-                    capacity: parseInt(seaterType),
-                    occupied: 0,
-                    status: "Vacant",
-                    type: acType || 'AC'
-                  });
-                }
+          let roomIndex = 0;
+          for (const [capStr, count] of Object.entries(counts)) {
+            const capacity = parseInt(capStr);
+            for (let i = 0; i < count; i++) {
+              const block = blocksList[roomIndex % blocksList.length];
+              const blockRoomIndex = Math.floor(roomIndex / blocksList.length);
+              const floor = Math.floor(blockRoomIndex / 10) + 1;
+              const roomNoVal = `${floor * 100 + (blockRoomIndex % 10) + 1}`;
+              rooms.push({
+                roomNo: roomNoVal,
+                block: block,
+                floor: `${floor}${floor === 1 ? 'st' : floor === 2 ? 'nd' : floor === 3 ? 'rd' : 'th'} Floor`,
+                capacity: capacity,
+                occupied: 0,
+                status: "Vacant",
+                type: acType || 'AC'
               });
+              roomIndex++;
             }
-          });
+          }
           localStorage.setItem("hms_rooms", JSON.stringify(rooms));
 
           // Seed default collections
@@ -340,13 +333,16 @@ function initApp() {
   }
 
   if (loginTitle) {
-    loginTitle.textContent = "Hostel Management System";
+    loginTitle.textContent = "HMS Portal";
   }
+
+  const loginContainer = document.getElementById("login-container");
+  const appContainer = document.getElementById("app-container");
 
   if (checkSession()) {
     // Show App layout, hide login
-    document.getElementById("login-container").style.display = "none";
-    document.getElementById("app-container").style.display = "flex";
+    if (loginContainer) loginContainer.style.display = "none";
+    if (appContainer) appContainer.style.display = "flex";
 
     renderHeader();
     renderSidebarForRole();
@@ -366,10 +362,11 @@ function initApp() {
     renderAllViews();
   } else {
     // Show Login layout, hide app
-    document.getElementById("login-container").style.display = "flex";
-    document.getElementById("app-container").style.display = "none";
+    if (loginContainer) loginContainer.style.display = "flex";
+    if (appContainer) appContainer.style.display = "none";
 
     // Set custom backside background of login page
+    const hostelInfo = DB.get("hostel_info");
     if (loginContainer && hostelInfo && hostelInfo.bgImage) {
       loginContainer.style.backgroundImage = `linear-gradient(rgba(15, 23, 42, 0.45), rgba(15, 23, 42, 0.45)), url(${hostelInfo.bgImage})`;
       loginContainer.style.backgroundSize = "cover";
@@ -467,8 +464,8 @@ function setupLoginHandlers() {
       adminRegisterForm.style.display = "none";
       document.getElementById("login-role-selector").style.display = "flex";
       loginForm.style.display = "block";
-      document.getElementById("login-title-text").textContent = "Hostel Management System";
-      document.getElementById("login-subtitle-text").textContent = "Login";
+      document.getElementById("login-title-text").textContent = "HMS Portal";
+      document.getElementById("login-subtitle-text").textContent = "Hostel Management System Login";
       helpText.style.display = "block";
 
       const regText = currentLoginRole === "student" ? "Register Now" : "Register Warden/Hostel";
@@ -494,8 +491,8 @@ function setupLoginHandlers() {
 
       loginForm.style.display = "block";
       document.getElementById("login-role-selector").style.display = "flex";
-      document.getElementById("login-title-text").textContent = "Hostel Management System";
-      document.getElementById("login-subtitle-text").textContent = "Login";
+      document.getElementById("login-title-text").textContent = "HMS Portal";
+      document.getElementById("login-subtitle-text").textContent = "Hostel Management System Login";
       helpText.style.display = "block";
 
       const regText = currentLoginRole === "student" ? "Register Now" : "Register Warden/Hostel";
@@ -626,7 +623,7 @@ function setupLoginHandlers() {
           document.getElementById("btn-back-to-login").click();
         })
         .catch(err => {
-          alert("❌ Error: " + err.message);
+          alert("Error: " + err.message);
         });
     };
   }
@@ -758,16 +755,15 @@ function setupLoginHandlers() {
         return;
       }
 
-      const rooms1 = parseInt(document.getElementById("admin-reg-rooms-1").value) || 0;
-      const rooms2 = parseInt(document.getElementById("admin-reg-rooms-2").value) || 0;
-      const rooms3 = parseInt(document.getElementById("admin-reg-rooms-3").value) || 0;
-      const rooms4 = parseInt(document.getElementById("admin-reg-rooms-4").value) || 0;
-      const totalRoomsVal = rooms1 + rooms2 + rooms3 + rooms4;
+      const r1 = parseInt(document.getElementById("admin-reg-rooms-1")?.value || "0");
+      const r2 = parseInt(document.getElementById("admin-reg-rooms-2")?.value || "0");
+      const r3 = parseInt(document.getElementById("admin-reg-rooms-3")?.value || "0");
+      const r4 = parseInt(document.getElementById("admin-reg-rooms-4")?.value || "0");
+      const totalRoomsVal = r1 + r2 + r3 + r4;
       
-      const acVal = document.getElementById("admin-reg-ac").value;
-      const blocksInput = document.getElementById("admin-reg-blocks").value.trim();
-      
-      // Removed roomsPerBlock for simplicity as total is dynamically distributed now
+      const acVal = document.getElementById("admin-reg-ac")?.value || "AC";
+      const blocksInput = document.getElementById("admin-reg-blocks")?.value.trim() || "";
+
       const registerPayload = {
         wardenName,
         wardenTitle,
@@ -775,13 +771,8 @@ function setupLoginHandlers() {
         adminPassword,
         hostelName,
         hostelAddress,
-        roomConfig: {
-          "1": rooms1,
-          "2": rooms2,
-          "3": rooms3,
-          "4": rooms4
-        },
         totalRooms: totalRoomsVal,
+        roomCounts: { 1: r1, 2: r2, 3: r3, 4: r4 },
         acType: acVal,
         blocks: blocksInput,
         accessCode
@@ -899,28 +890,11 @@ function approveStudentApplication(app) {
 // ==========================================
 
 function syncTheme() {
-  const settings = DB.get("settings");
-  if (settings && settings.darkMode) {
-    document.documentElement.setAttribute("data-theme", "dark");
-    const darkCheckbox = document.getElementById("settings-darkmode");
-    if (darkCheckbox) darkCheckbox.checked = true;
-  } else {
-    document.documentElement.removeAttribute("data-theme");
-    const darkCheckbox = document.getElementById("settings-darkmode");
-    if (darkCheckbox) darkCheckbox.checked = false;
-  }
+  document.documentElement.setAttribute("data-theme", "light");
 }
 
 function setupThemeToggle() {
-  const darkCheckbox = document.getElementById("settings-darkmode");
-  if (darkCheckbox) {
-    darkCheckbox.addEventListener("change", (e) => {
-      const settings = DB.get("settings") || {};
-      settings.darkMode = e.target.checked;
-      DB.set("settings", settings);
-      syncTheme();
-    });
-  }
+  // Dark mode has been removed from the system.
 }
 
 function renderHeader() {

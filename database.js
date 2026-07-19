@@ -80,15 +80,39 @@ const TenantSchema = new mongoose.Schema({
   students: { type: Array, default: [] }
 }, { strict: false });
 
+const PaymentSchema = new mongoose.Schema({
+  paymentId: { type: String, required: true, unique: true },
+  hostelId: String,
+  enrollment: String,
+  amount: Number,
+  date: { type: Date, default: Date.now },
+  status: { type: String, enum: ['Pending', 'Completed', 'Failed'], default: 'Pending' },
+  method: String,
+  description: String
+});
+
+const NotificationSchema = new mongoose.Schema({
+  notificationId: { type: String, required: true, unique: true },
+  hostelId: String,
+  recipientType: { type: String, enum: ['Student', 'Admin', 'All'] },
+  recipientId: String,
+  title: String,
+  message: String,
+  date: { type: Date, default: Date.now },
+  isRead: { type: Boolean, default: false }
+});
+
 const Hostel = mongoose.model('Hostel', HostelSchema);
 const Admin = mongoose.model('Admin', AdminSchema);
 const Student = mongoose.model('Student', StudentSchema);
 const Tenant = mongoose.model('Tenant', TenantSchema);
 const Owner = mongoose.model('Owner', OwnerSchema);
+const Payment = mongoose.model('Payment', PaymentSchema);
+const Notification = mongoose.model('Notification', NotificationSchema);
 
 const DB = {
   // Expose models if needed for migration scripts
-  Models: { Hostel, Admin, Student, Tenant, Owner },
+  Models: { Hostel, Admin, Student, Tenant, Owner, Payment, Notification },
 
   async init() {
     try {
@@ -258,7 +282,7 @@ const DB = {
       }
     }
   },
-  async toggleAdminStatus(username, isActive) {
+  async toggleAdminStatus(username, isActive) {
     await Admin.updateOne(
       { username: { $regex: new RegExp(`^${username}$`, 'i') } },
       { $set: { isActive } }
