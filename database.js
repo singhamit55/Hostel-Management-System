@@ -34,7 +34,6 @@ const OwnerSchema = new mongoose.Schema({
 
 const StudentSchema = new mongoose.Schema({
   enrollment: { type: String, required: true, unique: true },
-  password: String, // Kept for frontend plain-text compatibility (legacy support)
   passwordHash: String,
   hostelId: String,
   name: String,
@@ -233,6 +232,7 @@ const DB = {
   async createStudent(studentObj) {
     if (studentObj.password) {
       studentObj.passwordHash = bcrypt.hashSync(studentObj.password, 10);
+      delete studentObj.password;
     }
     await Student.create(studentObj);
   },

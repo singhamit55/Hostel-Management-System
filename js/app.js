@@ -36,7 +36,7 @@
 
         // --- Mock Routes ---
         if (path === "/api/auth/register-hostel" && method === "POST") {
-          const { wardenName, wardenTitle, adminUsername, adminPassword, hostelName, hostelAddress, totalRooms, roomCounts, acType, blocks, accessCode } = body;
+          const { wardenName, wardenTitle, adminUsername, adminPassword, hostelName, hostelAddress, totalRooms, roomConfig, acType, blocks, accessCode } = body;
 
           const hostelObj = {
             id: 'hostel_demo',
@@ -61,7 +61,7 @@
           // Generate rooms
           const blocksList = blocks ? blocks.split(',').map(b => b.trim().toUpperCase()).filter(b => b.length > 0) : ["A", "B", "C"];
           const rooms = [];
-          const counts = roomCounts || { 2: totalRooms || 120 };
+          const counts = roomConfig || { 2: totalRooms || 120 };
           
           let roomIndex = 0;
           for (const [capStr, count] of Object.entries(counts)) {
@@ -772,7 +772,7 @@ function setupLoginHandlers() {
         hostelName,
         hostelAddress,
         totalRooms: totalRoomsVal,
-        roomCounts: { 1: r1, 2: r2, 3: r3, 4: r4 },
+        roomConfig: { 1: r1, 2: r2, 3: r3, 4: r4 },
         acType: acVal,
         blocks: blocksInput,
         accessCode

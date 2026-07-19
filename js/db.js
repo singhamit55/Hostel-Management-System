@@ -36,7 +36,7 @@
 
         // --- Mock Routes ---
         if (path === "/api/auth/register-hostel" && method === "POST") {
-          const { wardenName, wardenTitle, adminUsername, adminPassword, hostelName, hostelAddress, totalRooms, roomCounts, acType, blocks, accessCode, bgImage, dashImage } = body;
+          const { wardenName, wardenTitle, adminUsername, adminPassword, hostelName, hostelAddress, totalRooms, roomConfig, acType, blocks, accessCode, bgImage, dashImage } = body;
 
           const hostelObj = {
             id: 'hostel_demo',
@@ -63,7 +63,7 @@
           // Generate rooms
           const blocksList = blocks ? blocks.split(',').map(b => b.trim().toUpperCase()).filter(b => b.length > 0) : ["A", "B", "C"];
           const rooms = [];
-          const counts = roomCounts || { 2: totalRooms || 120 };
+          const counts = roomConfig || { 2: totalRooms || 120 };
           
           let roomIndex = 0;
           for (const [capStr, count] of Object.entries(counts)) {
