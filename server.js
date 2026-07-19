@@ -13,14 +13,10 @@ const app = express();
 const PORT = process.env.PORT || 3002;
 const JWT_SECRET = process.env.JWT_SECRET || 'hms_secret_key_2026';
 
-const allowedOrigins = ['http://localhost:3000', 'http://127.0.0.1:3000', 'https://hostel-management-system-n115.onrender.com'];
 app.use(cors({
   origin: function (origin, callback) {
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
-    }
+    // Allow any origin for simplicity in this deployment, or specific known ones
+    callback(null, true);
   },
   credentials: true
 }));
@@ -257,7 +253,7 @@ app.post('/api/auth/login', async (req, res) => {
     }
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'Internal Server Error' });
+    res.status(500).json({ error: 'Internal Server Error: ' + (error.message || error) });
   }
 });
 
