@@ -1647,6 +1647,71 @@ textarea.form-control {
   }
 
   .main-content {
+/* Responsive Media Queries */
+@media screen and (max-width: 1024px) {
+  .sidebar {
+    width: 200px;
+  }
+  .main-wrapper {
+    margin-left: 200px;
+  }
+}
+
+@media screen and (max-height: 850px), screen and (max-width: 768px) {
+  /* Fix Login Container clipping on small/short screens */
+  #login-container {
+    align-items: flex-start !important;
+    padding: 40px 16px !important;
+  }
+  .login-card {
+    margin: 0 auto !important;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  /* Layout */
+  #app-container {
+    flex-direction: column;
+  }
+  
+  .sidebar {
+    width: 100% !important;
+    height: auto !important;
+    position: static !important;
+    border-right: none !important;
+    border-bottom: 1px solid var(--glass-border);
+    padding: 16px !important;
+  }
+  
+  .sidebar-header {
+    justify-content: center;
+    border-bottom: none;
+    padding-bottom: 12px;
+    margin-bottom: 0;
+  }
+
+  .sidebar-menu {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+  }
+  
+  .menu-item {
+    padding: 8px 12px !important;
+    font-size: 0.85rem !important;
+  }
+  
+  .menu-item span {
+    display: none; /* Hide text on mobile */
+  }
+  
+  .menu-item i {
+    margin: 0 !important;
+    font-size: 1.2rem !important;
+  }
+  
+  .main-wrapper {
     margin-left: 0 !important;
     width: 100% !important;
     padding: 16px !important;
@@ -1660,7 +1725,7 @@ textarea.form-control {
     align-items: flex-start;
   }
 
-  .header-actions {
+  .header-actions, .header-left, .header-right {
     width: 100%;
     justify-content: space-between;
   }
@@ -1668,13 +1733,23 @@ textarea.form-control {
   /* Grids and Stats */
   .dashboard-stats,
   .menu-cards,
-  .admin-grid {
+  .admin-grid,
+  .card-grid,
+  .form-row,
+  .form-group-row {
     grid-template-columns: 1fr !important;
+    display: flex !important;
+    flex-direction: column !important;
     gap: 16px;
   }
   
-  .stat-card {
+  .stat-card, .info-card {
+    width: 100%;
     padding: 16px;
+  }
+
+  .attendance-stats-strip {
+    flex-direction: column;
   }
 
   /* Tables */
@@ -1686,7 +1761,7 @@ textarea.form-control {
   }
   
   table {
-    min-width: 600px; /* Force table width so it scrolls instead of squishing */
+    min-width: 600px;
   }
 
   /* Modals */
@@ -1695,23 +1770,19 @@ textarea.form-control {
     margin: 10% auto;
     padding: 20px !important;
   }
-  
-  /* Forms */
-  .form-row, 
-  .form-group-row {
-    flex-direction: column;
-    gap: 16px;
-  }
 }
 
 @media (max-width: 480px) {
   .login-card {
     padding: 20px 16px !important;
   }
-  .nav-item {
-    font-size: 0.85rem;
+  .search-bar {
+    width: 100%;
   }
   h1, h2 {
     font-size: 1.5rem !important;
+  }
+  h3 {
+    font-size: 1.2rem !important;
   }
 }
