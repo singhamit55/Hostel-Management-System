@@ -960,10 +960,26 @@ function renderSidebarForRole() {
   }
 }
 
-function routeTo(target) {
+function routeTo(target, pushHistory = true) {
   // If Target is role-dependent dashboard, map it properly
   if (target === "dashboard") {
     target = currentRole === "admin" ? "admin-dashboard" : "dashboard";
+  }
+
+  // Handle SPA Browser History for Swipe-to-go-back and Back button
+  if (pushHistory) {
+    window.history.pushState({ target: target }, "", "?view=" + target);
+  }
+
+  // Handle visual Back Button visibility via CSS class
+  const isRoot = target === "dashboard" || target === "admin-dashboard";
+  const headerLeft = document.querySelector(".header-left");
+  if (headerLeft) {
+    if (!isRoot) {
+      headerLeft.classList.add("is-deep-link");
+    } else {
+      headerLeft.classList.remove("is-deep-link");
+    }
   }
 
   // Update Sidebar Active state
@@ -992,6 +1008,16 @@ function routeTo(target) {
     renderViewData(target);
   }
 }
+
+// Listen for browser back button / mobile edge swipe to go back
+window.addEventListener("popstate", (e) => {
+  if (e.state && e.state.target) {
+    routeTo(e.state.target, false); // false = don't push history again
+  } else {
+    // If no state, route to dashboard root
+    routeTo(currentRole === "student" ? "dashboard" : "admin-dashboard", false);
+  }
+});
 
 function getPageTitle(target) {
   const titles = {
@@ -1046,11 +1072,31 @@ function setupNavigation() {
     });
   }
 
+  // Back Button click handler
+  const backBtn = document.getElementById("back-btn");
+  if (backBtn) {
+    backBtn.addEventListener("click", () => {
+      window.history.back(); // Use native history back so popstate handles it
+    });
+  }
+
   // Backdrop overlay click to close
   if (overlay && sidebar) {
     overlay.addEventListener("click", () => {
       sidebar.classList.remove("active");
       overlay.classList.remove("active");
+    });
+  }
+
+  // User Profile Click Shortcut
+  const userPreview = document.getElementById("user-preview");
+  if (userPreview) {
+    userPreview.addEventListener("click", () => {
+      if (currentRole === "student") {
+        routeTo("profile");
+      } else {
+        routeTo("settings");
+      }
     });
   }
 
@@ -1600,9 +1646,23 @@ function renderAdminDashboard() {
   const attendance = DB.get("attendance") || [];
 
   // Update Welcome Banner dynamic hostel subtitle
+  const adminWelcomeText = document.getElementById("admin-dash-welcome-text");
   const adminWelcomeHostel = document.getElementById("admin-dash-welcome-hostel");
-  const hostelInfo = DB.get("hostel_info") || { name: "Hostel Management System" };
-  if (adminWelcomeHostel) adminWelcomeHostel.innerHTML = `<i class="fa-solid fa-hotel"></i> ${hostelInfo.name}`;
+  const hostelInfo = DB.get("hostel_info") || { name: "Hostel Management System", wardenName: "Admin", wardenTitle: "Chief Warden" };
+  
+  if (adminWelcomeText) {
+    adminWelcomeText.innerHTML = `👋 ${hostelInfo.wardenName || "Admin"} Control Board`;
+  }
+  if (adminWelcomeHostel) {
+    adminWelcomeHostel.innerHTML = `
+      <span style="color: var(--accent-primary); font-weight: 600; margin-right: 12px;">
+        <i class="fa-solid fa-user-shield"></i> ${hostelInfo.wardenTitle || "Chief Warden"}
+      </span>
+      <span>
+        <i class="fa-solid fa-hotel"></i> ${hostelInfo.name || "Hostel Management System"}
+      </span>
+    `;
+  }
 
   // Removed dashboard background image logic
 
