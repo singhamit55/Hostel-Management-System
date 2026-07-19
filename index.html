@@ -761,10 +761,16 @@
               <h5>Absent Days</h5>
               <div class="val" id="attend-absent-val">2</div>
             </div>
-            <button class="submit-btn" id="btn-qr-attendance"
-              style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 10px;">
-              <i class="fa-solid fa-qrcode"></i> Scan QR Attendance
-            </button>
+            <div style="display: flex; gap: 10px; width: 100%;">
+              <button class="submit-btn" id="btn-mark-present"
+                style="flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px; background: var(--success); color: white;">
+                <i class="fa-solid fa-check"></i> Mark Present
+              </button>
+              <button class="submit-btn" id="btn-mark-absent"
+                style="flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px; background: var(--danger); color: white;">
+                <i class="fa-solid fa-xmark"></i> Mark Absent
+              </button>
+            </div>
           </div>
 
           <!-- Chart Holder -->

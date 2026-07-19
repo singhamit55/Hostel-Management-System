@@ -2716,34 +2716,37 @@ function setupQuickActions() {
   }
 
   // Attendance Page Quick Checkin
-  const mainQRBtn = document.getElementById("btn-qr-attendance");
-  if (mainQRBtn) {
-    mainQRBtn.addEventListener("click", openQRAttendanceModal);
-  }
-}
+  const btnPresent = document.getElementById("btn-mark-present");
+  const btnAbsent = document.getElementById("btn-mark-absent");
 
-function openQRAttendanceModal() {
-  const modal = document.getElementById("modal-qr-attendance");
-  if (modal) {
-    modal.classList.add("active");
-    // Render QR Code using the CDN library QRCode
-    const container = document.getElementById("qr-code-box");
-    if (container) {
-      container.innerHTML = ""; // clear previous
-      try {
-        new QRCode(container, {
-          text: `https://hostel.campus/attendance?student=${currentStudentEnrollment}&timestamp=${Date.now()}`,
-          width: 180,
-          height: 180,
-          colorDark: "#0f172a",
-          colorLight: "#ffffff",
-          correctLevel: QRCode.CorrectLevel.H
-        });
-      } catch (err) {
-        // Fallback if library fails
-        container.innerHTML = `<i class="fa-solid fa-qrcode" style="font-size: 8rem; color: var(--text-primary);"></i>`;
-      }
+  const markAttendance = (status) => {
+    const today = new Date().toISOString().split("T")[0];
+    const attendance = DB.get("attendance") || [];
+    const alreadyChecked = attendance.some(a => a.enrollment === currentStudentEnrollment && a.date === today);
+
+    if (alreadyChecked) {
+      alert(`You have already marked your attendance for today!`);
+      return;
     }
+
+    attendance.push({
+      id: "ATT-" + Math.floor(1000 + Math.random() * 9000),
+      enrollment: currentStudentEnrollment,
+      date: today,
+      status: status,
+      time: new Date().toLocaleTimeString()
+    });
+
+    DB.set("attendance", attendance);
+    alert(`Successfully marked as ${status} for today!`);
+    renderAttendancePage();
+  };
+
+  if (btnPresent) {
+    btnPresent.addEventListener("click", () => markAttendance("Present"));
+  }
+  if (btnAbsent) {
+    btnAbsent.addEventListener("click", () => markAttendance("Absent"));
   }
 }
 
