@@ -166,7 +166,7 @@ app.post('/api/auth/register-hostel', async (req, res) => {
     res.json({ success: true, message: 'Hostel and Admin account registered successfully!' });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'Internal Server Error' });
+    res.status(500).json({ error: 'Internal Server Error: ' + (error.message || error) });
   }
 });
 
